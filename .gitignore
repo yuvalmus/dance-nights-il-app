@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Build
+android/
+ios/
+
+# Metro
+.metro-health-check*
+
+# Environment
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
