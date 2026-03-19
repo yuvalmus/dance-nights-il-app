@@ -28,7 +28,7 @@
       "package": "com.noche.app",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBmBUd-3SZtlJ_RKAxASOPbo5mW6O1wzhc"
+          "apiKey": "<Google Maps SDK for Android API key here>"
         }
       },
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
