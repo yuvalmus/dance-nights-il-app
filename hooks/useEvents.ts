@@ -1,50 +1,54 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { EventWithVenue } from '@/types/database';
-import { getUserLocation, DEFAULT_LOCATION } from '@/lib/location';
+import { getUserLocation } from '@/lib/location';
+import { cachedFetch, invalidate, TTL } from '@/lib/cache';
 
 export function useEvents(date: string) {
   const [events, setEvents] = useState<EventWithVenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const cacheKey = `events:${date}`;
+
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const location = await getUserLocation();
+      const data = await cachedFetch(cacheKey, TTL.EVENTS, async () => {
+        const location = await getUserLocation();
+        const { data, error: rpcError } = await supabase.rpc(
+          'get_events_by_date_and_distance',
+          { target_date: date, user_lat: location.latitude, user_lng: location.longitude },
+        );
+        if (rpcError) throw rpcError;
+        return data ?? [];
+      });
 
-      const { data, error: rpcError } = await supabase.rpc(
-        'get_events_by_date_and_distance',
-        {
-          target_date: date,
-          user_lat: location.latitude,
-          user_lng: location.longitude,
-        }
-      );
-
-      if (rpcError) throw rpcError;
-      setEvents(data ?? []);
+      setEvents(data);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching events:', err);
     } finally {
       setLoading(false);
     }
-  }, [date]);
+  }, [cacheKey]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
-  return { events, loading, error, refetch: fetchEvents };
+  const refetch = useCallback(() => {
+    invalidate(cacheKey);
+    return fetchEvents();
+  }, [cacheKey, fetchEvents]);
+
+  return { events, loading, error, refetch };
 }
 
-// Filter events by dance style
+// Filter events by dance style (client-side, no fetch)
 export function filterEventsByStyle(
   events: EventWithVenue[],
-  style: string | null
+  style: string | null,
 ): EventWithVenue[] {
   if (!style) return events;
   return events.filter((e) => e.dance_styles.includes(style));

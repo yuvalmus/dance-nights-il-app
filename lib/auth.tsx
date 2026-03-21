@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { clearCache } from './cache';
 
 type AuthContextType = {
   session: Session | null;
@@ -47,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    clearCache();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
