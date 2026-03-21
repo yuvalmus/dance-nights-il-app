@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { usePoll } from '@/hooks/usePoll';
 import { useAuth } from '@/lib/auth';

@@ -29,3 +29,6 @@ ios/
 
 # TypeScript
 *.tsbuildinfo
+
+# Other
+.claude

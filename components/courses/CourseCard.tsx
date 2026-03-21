@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@/components/ui/Icon';
 import { Colors, DanceStyleColors } from '@/constants/colors';
 import { Course } from '@/types/database';
 import { DANCE_STYLE_LABELS } from '@/constants/config';

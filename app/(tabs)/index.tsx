@@ -1,16 +1,17 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/colors';
-import { useEvents, filterEventsByStyle } from '@/hooks/useEvents';
-import { EventMap } from '@/components/map/EventMap';
-import { DateRibbon } from '@/components/map/DateRibbon';
-import { EventBottomSheet } from '@/components/events/EventBottomSheet';
-import { FilterPills } from '@/components/events/FilterPills';
-import { PollButton } from '@/components/poll/PollButton';
+import { useState, useRef, useCallback, useMemo } from "react";
+import { View, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "@/constants/colors";
+import { useEvents, filterEventsByStyle } from "@/hooks/useEvents";
+import { EventMap } from "@/components/map/EventMap";
+import { DateRibbon } from "@/components/map/DateRibbon";
+import { EventBottomSheet } from "@/components/events/EventBottomSheet";
+import { FilterPills } from "@/components/events/FilterPills";
+import { PollButton } from "@/components/poll/PollButton";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 export default function TonightScreen() {
@@ -21,7 +22,7 @@ export default function TonightScreen() {
   const { events, loading, error, refetch } = useEvents(selectedDate);
   const filteredEvents = useMemo(
     () => filterEventsByStyle(events, styleFilter),
-    [events, styleFilter]
+    [events, styleFilter],
   );
 
   const handlePinPress = useCallback((eventId: string) => {
@@ -30,7 +31,7 @@ export default function TonightScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <DateRibbon
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   safeArea: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,

@@ -1,8 +1,8 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AuthProvider } from '@/lib/auth';
-import { Colors } from '@/constants/colors';
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { AuthProvider } from "@/lib/auth";
+import { Colors } from "@/constants/colors";
 
 export default function RootLayout() {
   return (
@@ -19,8 +19,8 @@ export default function RootLayout() {
           <Stack.Screen
             name="(auth)"
             options={{
-              presentation: 'modal',
-              animation: 'slide_from_bottom',
+              presentation: "modal",
+              animation: "slide_from_bottom",
             }}
           />
         </Stack>
