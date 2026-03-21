@@ -4,7 +4,7 @@ export const TAB_BAR_CONFIG = {
   /** Height of the flat portion of the bar (excluding safe area inset) */
   barHeight: 60,
   /** Diameter of the elevated center circle */
-  circleSize: 64,
+  circleSize: 70,
   /** How far the convex hill rises above the flat bar edge */
   curveRise: 30,
   /** Width of the convex hill region */
@@ -12,9 +12,9 @@ export const TAB_BAR_CONFIG = {
   /** Duration of the show/hide slide animation (ms) */
   visibilityDuration: 300,
   /** Icon size for side tabs */
-  iconSize: 32,
+  iconSize: 38,
   /** Icon size for the center button */
-  centerIconSize: 36,
+  centerIconSize: 40,
   /** Shadow elevation for Android */
   elevation: 12,
 };
