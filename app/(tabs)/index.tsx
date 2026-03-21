@@ -38,11 +38,11 @@ export default function TonightScreen() {
         />
       </SafeAreaView>
 
-      {/* <EventMap
+      <EventMap
         events={filteredEvents}
         selectedEventId={selectedEventId}
         onPinPress={handlePinPress}
-      /> */}
+      />
 
       <PollButton date={selectedDate} />
 
