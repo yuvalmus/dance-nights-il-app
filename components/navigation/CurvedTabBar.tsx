@@ -15,7 +15,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import { Colors } from '@/constants/colors';
 import { TAB_BAR_CONFIG, CurvedTabBarRef, CurvedTabBarProps } from './tabBarConfig';
 import { buildCurvedUpPath } from './buildCurvedPath';
@@ -131,6 +131,9 @@ const CurvedTabBar = forwardRef<CurvedTabBarRef, CurvedTabBarProps>(
       // clearly visible above the icon.
       const circleTop = 8;
 
+      const glowSize = TAB_BAR_CONFIG.circleSize + androidGlowSize;
+      const glowOpacity = isFocused ? 0.55 : 0.3;
+
       return (
         <Animated.View
           style={[
@@ -139,6 +142,21 @@ const CurvedTabBar = forwardRef<CurvedTabBarRef, CurvedTabBarProps>(
             centerButtonAnimStyle,
           ]}
         >
+          {/* Android gold glow — SVG radial gradient for a smooth falloff */}
+          {Platform.OS === 'android' && (
+            <View style={styles.androidGlowSvg} pointerEvents="none">
+              <Svg width={glowSize} height={glowSize}>
+                <Defs>
+                  <RadialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+                    <Stop offset="0" stopColor={Colors.primary} stopOpacity={glowOpacity} />
+                    <Stop offset="0.6" stopColor={Colors.primary} stopOpacity={glowOpacity * 0.35} />
+                    <Stop offset="1" stopColor={Colors.primary} stopOpacity={0} />
+                  </RadialGradient>
+                </Defs>
+                <Rect x={0} y={0} width={glowSize} height={glowSize} fill="url(#goldGlow)" />
+              </Svg>
+            </View>
+          )}
           <TouchableOpacity
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
@@ -205,6 +223,7 @@ const CurvedTabBar = forwardRef<CurvedTabBarRef, CurvedTabBarProps>(
   }
 );
 
+const androidGlowSize = 25;
 CurvedTabBar.displayName = 'CurvedTabBar';
 export default CurvedTabBar;
 
@@ -301,5 +320,14 @@ const styles = StyleSheet.create({
         shadowRadius: 14,
       },
     }),
+  },
+
+  // ── Android gold glow (SVG radial gradient behind the button) ───────
+  androidGlowSvg: {
+    position: 'absolute',
+    width: TAB_BAR_CONFIG.circleSize + androidGlowSize,
+    height: TAB_BAR_CONFIG.circleSize + androidGlowSize,
+    top: -(androidGlowSize / 2),
+    left: -(androidGlowSize / 2),
   },
 });
