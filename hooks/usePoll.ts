@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PollWithOptions } from '@/types/database';
 import { useAuth } from '@/lib/auth';
+import { cachedFetch, invalidate, TTL } from '@/lib/cache';
 
 export function usePoll(date: string) {
   const [poll, setPoll] = useState<PollWithOptions | null>(null);
@@ -10,26 +11,26 @@ export function usePoll(date: string) {
   const [votingLoading, setVotingLoading] = useState(false);
   const { user } = useAuth();
 
+  const cacheKey = `poll:${date}`;
+
   const fetchPoll = useCallback(async () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from('polls')
-        .select(`
-          *,
-          poll_options (
-            id, label, sort_order,
-            poll_votes ( count )
-          )
-        `)
-        .eq('date', date)
-        .single();
+      const data = await cachedFetch(cacheKey, TTL.POLL, async () => {
+        const { data, error } = await supabase
+          .from('polls')
+          .select(`*, poll_options (id, label, sort_order, poll_votes ( count ))`)
+          .eq('date', date)
+          .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      setPoll(data as PollWithOptions | null);
+        if (error && error.code !== 'PGRST116') throw error;
+        return data as PollWithOptions | null;
+      });
 
-      // Check if current user has voted
+      setPoll(data);
+
+      // Check if current user has voted (lightweight, not cached)
       if (data && user) {
         const { data: voteData } = await supabase
           .from('poll_votes')
@@ -45,11 +46,9 @@ export function usePoll(date: string) {
     } finally {
       setLoading(false);
     }
-  }, [date, user]);
+  }, [cacheKey, user]);
 
-  useEffect(() => {
-    fetchPoll();
-  }, [fetchPoll]);
+  useEffect(() => { fetchPoll(); }, [fetchPoll]);
 
   const vote = useCallback(
     async (optionId: string) => {
@@ -65,20 +64,26 @@ export function usePoll(date: string) {
 
         if (error) throw error;
         setHasVoted(true);
-        await fetchPoll(); // Refresh to get updated counts
+        invalidate(cacheKey); // Fresh counts after voting
+        await fetchPoll();
       } catch (err: any) {
         console.error('Error voting:', err);
       } finally {
         setVotingLoading(false);
       }
     },
-    [user, poll, fetchPoll]
+    [user, poll, cacheKey, fetchPoll],
   );
 
   const totalVotes = poll?.poll_options?.reduce(
     (sum, opt) => sum + (opt.poll_votes?.[0]?.count ?? 0),
-    0
+    0,
   ) ?? 0;
 
-  return { poll, loading, hasVoted, vote, votingLoading, totalVotes, refetch: fetchPoll };
+  const refetch = useCallback(() => {
+    invalidate(cacheKey);
+    return fetchPoll();
+  }, [cacheKey, fetchPoll]);
+
+  return { poll, loading, hasVoted, vote, votingLoading, totalVotes, refetch };
 }
