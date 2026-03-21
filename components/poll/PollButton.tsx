@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { usePoll } from '@/hooks/usePoll';
 import { PollModal } from './PollModal';

@@ -1,52 +1,46 @@
+import React, { useRef } from 'react';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/colors';
+import { Ionicons, MaterialCommunityIcons } from '@/components/ui/Icon';
+import CurvedTabBar from '@/components/navigation/CurvedTabBar';
+import { CurvedTabBarRef } from '@/components/navigation/tabBarConfig';
 
 export default function TabLayout() {
+  const tabBarRef = useRef<CurvedTabBarRef>(null);
+
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-          height: 85,
-          paddingBottom: 20,
-          paddingTop: 8,
-        },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textMuted,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
-      }}
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <CurvedTabBar ref={tabBarRef} {...props} />}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'הלילה',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
-          ),
-        }}
-      />
+      {/* LEFT side — Courses, bootcamps & festivals */}
       <Tabs.Screen
         name="courses"
         options={{
-          title: 'קורסים',
+          title: 'Explore',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="school" size={size} color={color} />
+            <Ionicons name="sparkles-outline" size={size} color={color} />
           ),
         }}
       />
+
+      {/* CENTER — The main dance / tonight map screen */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Dance',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="dance-ballroom" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* RIGHT side — Profile */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'פרופיל',
+          title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <MaterialCommunityIcons name="account-circle-outline" size={size} color={color} />
           ),
         }}
       />
