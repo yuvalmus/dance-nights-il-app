@@ -1,21 +1,17 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { useEvents, filterEventsByStyle } from "@/hooks/useEvents";
 import { EventMap } from "@/components/map/EventMap";
-import { DateRibbon } from "@/components/map/DateRibbon";
+import { DateToggle } from "@/components/map/DateToggle";
 import { EventBottomSheet } from "@/components/events/EventBottomSheet";
 import { FilterPills } from "@/components/events/FilterPills";
 import { PollButton } from "@/components/poll/PollButton";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-function getTodayString(): string {
-  return new Date().toISOString().split("T")[0];
-}
+const TODAY = new Date().toISOString().split("T")[0];
 
 export default function TonightScreen() {
-  const [selectedDate, setSelectedDate] = useState(getTodayString());
+  const [selectedDate, setSelectedDate] = useState(TODAY);
   const [styleFilter, setStyleFilter] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
@@ -31,17 +27,16 @@ export default function TonightScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <DateRibbon
-          selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
-        />
-      </SafeAreaView>
-
       <EventMap
         events={filteredEvents}
         selectedEventId={selectedEventId}
         onPinPress={handlePinPress}
+      />
+
+      <DateToggle
+        selectedDate={selectedDate}
+        todayString={TODAY}
+        onDateSelect={setSelectedDate}
       />
 
       <PollButton date={selectedDate} />
@@ -66,12 +61,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-  },
-  safeArea: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
   },
 });
