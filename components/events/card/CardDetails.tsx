@@ -9,10 +9,10 @@ type Props = {
   event: EventWithVenue;
   accentColor: string;
   onNavigate: () => void;
-  onArbox: () => void;
+  onRegister: () => void;
 };
 
-export function CardDetails({ event, accentColor, onNavigate, onArbox }: Props) {
+export function CardDetails({ event, accentColor, onNavigate, onRegister }: Props) {
   return (
     <View style={styles.container}>
       {event.description && (
@@ -39,7 +39,7 @@ export function CardDetails({ event, accentColor, onNavigate, onArbox }: Props) 
       {event.pre_register ? (
         <TouchableOpacity
           style={[styles.cta, { backgroundColor: accentColor }]}
-          onPress={onArbox}
+          onPress={onRegister}
         >
           <Text style={styles.ctaText}>הרשמה ←</Text>
         </TouchableOpacity>

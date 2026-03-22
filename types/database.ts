@@ -23,7 +23,7 @@ export interface Database {
           theme_color: string;
           logo_url: string | null;
           instagram_url: string | null;
-          arbox_base_url: string | null;
+          booking_url: string | null;
           phone: string | null;
           is_active: boolean;
           created_at: string;
@@ -50,7 +50,7 @@ export interface Database {
           dj: string | null;
           instructors: string[];
           pre_register: boolean;
-          arbox_link: string | null;
+          registration_link: string | null;
           spots_total: number | null;
           spots_taken: number;
           is_published: boolean;
@@ -210,7 +210,7 @@ export type EventWithVenue = {
   price_note: string | null;
   dj: string | null;
   pre_register: boolean;
-  arbox_link: string | null;
+  registration_link: string | null;
   spots_total: number | null;
   spots_taken: number;
   venue_name: string;

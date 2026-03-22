@@ -41,9 +41,9 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
     );
   }, [event.venue_lat, event.venue_lng]);
 
-  const openArbox = useCallback(() => {
-    if (event.arbox_link) Linking.openURL(event.arbox_link);
-  }, [event.arbox_link]);
+  const openRegistration = useCallback(() => {
+    if (event.registration_link) Linking.openURL(event.registration_link);
+  }, [event.registration_link]);
 
   return (
     <>
@@ -80,7 +80,7 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
             event={event}
             accentColor={accentColor}
             onNavigate={openNavigation}
-            onArbox={openArbox}
+            onRegister={openRegistration}
           />
         )}
       </TouchableOpacity>
