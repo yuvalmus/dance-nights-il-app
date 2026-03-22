@@ -6,19 +6,24 @@ type Props = {
   address: string;
   city: string;
   parkingInfo?: string | null;
+  hasCoordinates: boolean;
   onNavigate: () => void;
 };
 
-export function AddressBox({ address, city, parkingInfo, onNavigate }: Props) {
+export function AddressBox({ address, city, parkingInfo, hasCoordinates, onNavigate }: Props) {
+  const displayAddress = address && city
+    ? `${address}, ${city}`
+    : address || city || '';
+
   return (
     <View style={styles.box}>
       <View style={styles.row}>
         <View style={styles.info}>
           <View style={styles.labelRow}>
             <Ionicons name="location" size={12} color={Colors.textSecondary} />
-            <Text style={styles.label}> כתובת</Text>
+            <Text style={styles.label}> מיקום</Text>
           </View>
-          <Text style={styles.address}>{address}, {city}</Text>
+          {displayAddress ? <Text style={styles.address}>{displayAddress}</Text> : null}
           {parkingInfo && (
             <View style={styles.parkingRow}>
               <Ionicons name="car-outline" size={11} color={Colors.success} />
@@ -26,9 +31,11 @@ export function AddressBox({ address, city, parkingInfo, onNavigate }: Props) {
             </View>
           )}
         </View>
-        <TouchableOpacity style={styles.navBtn} onPress={onNavigate}>
-          <Ionicons name="navigate" size={18} color={Colors.text} />
-        </TouchableOpacity>
+        {hasCoordinates && (
+          <TouchableOpacity style={styles.navBtn} onPress={onNavigate}>
+            <Ionicons name="navigate" size={18} color={Colors.text} />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

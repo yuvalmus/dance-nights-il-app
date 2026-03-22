@@ -4,6 +4,7 @@ import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
 import { DANCE_LEVEL_LABELS } from '@/constants/config';
 import { isEventLive } from '@/lib/date';
+import { openNavigation } from '@/lib/navigation';
 import { SpotsBar } from '@/components/ui/SpotsBar';
 import { HeroPoster } from './card/HeroPoster';
 import { CardHeader } from './card/CardHeader';
@@ -21,6 +22,7 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
   const accentColor = event.theme_color || Colors.primary;
   const distanceKm = (event.distance_meters / 1000).toFixed(1);
   const hasPoster = !!event.poster_url;
+  const hasCoordinates = !!(event.venue_lat && event.venue_lng);
   const live = isEventLive(event.date, event.schedules?.[0]?.time);
 
   const levelBadges = useMemo(() => {
@@ -35,13 +37,11 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
     );
   }, [event.schedules]);
 
-  const openNavigation = useCallback(() => {
-    Linking.openURL(
-      `https://waze.com/ul?ll=${event.venue_lat},${event.venue_lng}&navigate=yes`,
-    );
-  }, [event.venue_lat, event.venue_lng]);
+  const handleNavigate = useCallback(() => {
+    openNavigation(event.venue_lat, event.venue_lng, event.venue_name);
+  }, [event.venue_lat, event.venue_lng, event.venue_name]);
 
-  const openRegistration = useCallback(() => {
+  const handleRegister = useCallback(() => {
     if (event.registration_link) Linking.openURL(event.registration_link);
   }, [event.registration_link]);
 
@@ -79,8 +79,9 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
           <CardDetails
             event={event}
             accentColor={accentColor}
-            onNavigate={openNavigation}
-            onRegister={openRegistration}
+            hasCoordinates={hasCoordinates}
+            onNavigate={handleNavigate}
+            onRegister={handleRegister}
           />
         )}
       </TouchableOpacity>

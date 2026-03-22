@@ -8,11 +8,12 @@ import { AddressBox } from './AddressBox';
 type Props = {
   event: EventWithVenue;
   accentColor: string;
+  hasCoordinates: boolean;
   onNavigate: () => void;
   onRegister: () => void;
 };
 
-export function CardDetails({ event, accentColor, onNavigate, onRegister }: Props) {
+export function CardDetails({ event, accentColor, hasCoordinates, onNavigate, onRegister }: Props) {
   return (
     <View style={styles.container}>
       {event.description && (
@@ -29,12 +30,15 @@ export function CardDetails({ event, accentColor, onNavigate, onRegister }: Prop
 
       {event.price_note && <Text style={styles.priceNote}>{event.price_note}</Text>}
 
-      <AddressBox
-        address={event.address}
-        city={event.city}
-        parkingInfo={event.parking_info}
-        onNavigate={onNavigate}
-      />
+      {(event.address || event.city || hasCoordinates) && (
+        <AddressBox
+          address={event.address}
+          city={event.city}
+          parkingInfo={event.parking_info}
+          hasCoordinates={hasCoordinates}
+          onNavigate={onNavigate}
+        />
+      )}
 
       {event.pre_register ? (
         <TouchableOpacity
