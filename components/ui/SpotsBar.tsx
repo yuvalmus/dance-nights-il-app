@@ -36,7 +36,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 8,
-    marginTop: 8,
+    marginVertical: 8,
+    paddingHorizontal: 18,
   },
   barBg: {
     flex: 1,

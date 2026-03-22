@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { EventWithVenue } from '@/types/database';
 import { getUserLocation } from '@/lib/location';
 import { cachedFetch, invalidate, TTL } from '@/lib/cache';
+import { isEventLive } from '@/lib/date';
 
 export function useEvents(date: string) {
   const [events, setEvents] = useState<EventWithVenue[]>([]);
@@ -45,11 +46,23 @@ export function useEvents(date: string) {
   return { events, loading, error, refetch };
 }
 
-// Filter events by dance style (client-side, no fetch)
-export function filterEventsByStyle(
+export function filterEvents(
   events: EventWithVenue[],
-  style: string | null,
+  danceStyle: string | null,
+  liveOnly: boolean,
 ): EventWithVenue[] {
-  if (!style) return events;
-  return events.filter((e) => e.dance_styles.includes(style));
+  let filtered = danceStyle
+    ? events.filter((e) => e.dance_styles.includes(danceStyle))
+    : [...events];
+
+  if (liveOnly) {
+    filtered = filtered.filter((e) => isEventLive(e.date, e.schedules?.[0]?.time));
+  }
+
+  return filtered.sort((a, b) => {
+    const aLive = isEventLive(a.date, a.schedules?.[0]?.time) ? 0 : 1;
+    const bLive = isEventLive(b.date, b.schedules?.[0]?.time) ? 0 : 1;
+    if (aLive !== bLive) return aLive - bLive;
+    return a.distance_meters - b.distance_meters;
+  });
 }

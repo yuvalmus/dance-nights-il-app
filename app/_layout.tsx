@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider } from "@/lib/auth";
 import { Colors } from "@/constants/colors";
 import { useAppReady } from "@/hooks/useAppReady";
+import { NavigationSheet, navigationSheetRef } from "@/components/ui/NavigationSheet";
 
 export default function RootLayout() {
   const ready = useAppReady();
@@ -29,6 +30,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        <NavigationSheet ref={navigationSheetRef} />
       </AuthProvider>
     </GestureHandlerRootView>
   );

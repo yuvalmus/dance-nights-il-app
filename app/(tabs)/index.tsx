@@ -1,25 +1,49 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
+import { useNavigation } from "expo-router";
 import { Colors } from "@/constants/colors";
-import { useEvents, filterEventsByStyle } from "@/hooks/useEvents";
+import { useEvents, filterEvents } from "@/hooks/useEvents";
 import { EventMap } from "@/components/map/EventMap";
 import { DateToggle } from "@/components/map/DateToggle";
-import { EventBottomSheet } from "@/components/events/EventBottomSheet";
+import { EventBottomSheet, SheetRef } from "@/components/events/EventBottomSheet";
 import { FilterPills } from "@/components/events/FilterPills";
 import { PollButton } from "@/components/poll/PollButton";
+import { getTodayKey, isInBoundaryWindow, getLastNightKey } from "@/lib/date";
 
-const TODAY = new Date().toISOString().split("T")[0];
+const BOUNDARY = isInBoundaryWindow();
+const INITIAL_DATE = BOUNDARY ? getLastNightKey() : getTodayKey();
 
 export default function TonightScreen() {
-  const [selectedDate, setSelectedDate] = useState(TODAY);
-  const [styleFilter, setStyleFilter] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(INITIAL_DATE);
+  const [danceStyleFilter, setDanceStyleFilter] = useState<string | null>(null);
+  const [liveFilter, setLiveFilter] = useState(BOUNDARY);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const sheetRef = useRef<SheetRef>(null);
+  const navigation = useNavigation();
+
+  // Toggle sheet when center tab is pressed while already focused
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      if (navigation.isFocused()) {
+        sheetRef.current?.toggle();
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const { events, loading, error, refetch } = useEvents(selectedDate);
   const filteredEvents = useMemo(
-    () => filterEventsByStyle(events, styleFilter),
-    [events, styleFilter],
+    () => filterEvents(events, danceStyleFilter, liveFilter),
+    [events, danceStyleFilter, liveFilter],
   );
+
+  const isTodaySelected = selectedDate === INITIAL_DATE;
+
+  useEffect(() => {
+    if (!isTodaySelected) setLiveFilter(false);
+  }, [isTodaySelected]);
+
+  const toggleLiveFilter = useCallback(() => setLiveFilter((v) => !v), []);
 
   const handlePinPress = useCallback((eventId: string) => {
     setSelectedEventId(eventId);
@@ -35,21 +59,24 @@ export default function TonightScreen() {
 
       <DateToggle
         selectedDate={selectedDate}
-        todayString={TODAY}
         onDateSelect={setSelectedDate}
       />
 
-      <PollButton date={selectedDate} />
-
       <EventBottomSheet
+        ref={sheetRef}
         events={filteredEvents}
         loading={loading}
         selectedEventId={selectedEventId}
         onEventSelect={setSelectedEventId}
+        liveFilter={liveFilter}
+        pollComponent={<PollButton date={selectedDate} />}
         headerComponent={
           <FilterPills
-            selectedStyle={styleFilter}
-            onStyleSelect={setStyleFilter}
+            selectedDanceStyle={danceStyleFilter}
+            onDanceStyleSelect={setDanceStyleFilter}
+            liveFilter={liveFilter}
+            onLiveToggle={toggleLiveFilter}
+            liveDisabled={!isTodaySelected}
           />
         }
       />

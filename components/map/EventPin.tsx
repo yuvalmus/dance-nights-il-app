@@ -1,14 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, DanceStyleColors } from '@/constants/colors';
+import { Colors } from '@/constants/colors';
 
 type Props = {
   name: string;
-  style?: string;
   isSelected: boolean;
 };
 
-export function EventPin({ name, style, isSelected }: Props) {
-  const pinColor = style ? DanceStyleColors[style] ?? Colors.primary : Colors.primary;
+export function EventPin({ name, isSelected }: Props) {
+  const pinColor = Colors.primary;
 
   return (
     <View style={styles.container}>

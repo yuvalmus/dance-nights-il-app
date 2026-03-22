@@ -4,7 +4,6 @@ import { Platform } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT, MapStyleElement } from 'react-native-maps';
 import { EventWithVenue } from '@/types/database';
 import { MAP_CONFIG } from '@/constants/config';
-import { Colors, DanceStyleColors } from '@/constants/colors';
 import { EventPin } from './EventPin';
 
 type Props = {
@@ -16,7 +15,6 @@ type Props = {
 export function EventMap({ events, selectedEventId, onPinPress }: Props) {
   const mapRef = useRef<MapView>(null);
 
-  // Fit map to show all event markers
   useEffect(() => {
     if (events.length > 0 && mapRef.current) {
       const coords = events.map((e) => ({
@@ -52,7 +50,6 @@ export function EventMap({ events, selectedEventId, onPinPress }: Props) {
         >
           <EventPin
             name={event.venue_name}
-            style={event.dance_styles[0]}
             isSelected={selectedEventId === event.event_id}
           />
         </Marker>

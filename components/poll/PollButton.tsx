@@ -11,23 +11,19 @@ type Props = {
 
 export function PollButton({ date }: Props) {
   const [visible, setVisible] = useState(false);
-  const { poll, totalVotes } = usePoll(date);
+  const { poll } = usePoll(date);
 
   if (!poll) return null;
 
   return (
     <>
       <TouchableOpacity
-        style={styles.fab}
+        style={styles.button}
         onPress={() => setVisible(true)}
         activeOpacity={0.85}
       >
-        <Ionicons name="podium" size={22} color={Colors.background} />
-        {totalVotes > 0 && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{totalVotes}</Text>
-          </View>
-        )}
+        <Ionicons name="podium" size={16} color={Colors.background} />
+        <Text style={styles.label}>איפה רוקדים היום?</Text>
       </TouchableOpacity>
 
       <PollModal
@@ -40,38 +36,18 @@ export function PollButton({ date }: Props) {
 }
 
 const styles = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    bottom: 160,
-    left: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  button: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
-    zIndex: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: Colors.error,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 11,
+  label: {
+    color: Colors.background,
+    fontSize: 13,
     fontWeight: '700',
   },
 });

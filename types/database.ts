@@ -23,7 +23,7 @@ export interface Database {
           theme_color: string;
           logo_url: string | null;
           instagram_url: string | null;
-          arbox_base_url: string | null;
+          booking_url: string | null;
           phone: string | null;
           is_active: boolean;
           created_at: string;
@@ -50,7 +50,7 @@ export interface Database {
           dj: string | null;
           instructors: string[];
           pre_register: boolean;
-          arbox_link: string | null;
+          registration_link: string | null;
           spots_total: number | null;
           spots_taken: number;
           is_published: boolean;
@@ -201,6 +201,7 @@ export type Course = Database['public']['Tables']['courses']['Row'];
 // The shape returned by the get_events_by_date_and_distance RPC
 export type EventWithVenue = {
   event_id: string;
+  date: string;
   title: string;
   description: string | null;
   dance_styles: string[];
@@ -209,7 +210,7 @@ export type EventWithVenue = {
   price_note: string | null;
   dj: string | null;
   pre_register: boolean;
-  arbox_link: string | null;
+  registration_link: string | null;
   spots_total: number | null;
   spots_taken: number;
   venue_name: string;

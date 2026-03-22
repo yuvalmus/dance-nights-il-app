@@ -1,71 +1,74 @@
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Colors, DanceStyleColors } from '@/constants/colors';
-import { DANCE_STYLES, DANCE_STYLE_LABELS } from '@/constants/config';
+import { View, ScrollView, StyleSheet } from "react-native";
+import { Colors } from "@/constants/colors";
+import { DANCE_STYLES, DANCE_STYLE_LABELS } from "@/constants/config";
+import { DanceStylePill } from "./DanceStylePill";
+import { LiveToggle } from "./LiveToggle";
 
 type Props = {
-  selectedStyle: string | null;
-  onStyleSelect: (style: string | null) => void;
+  selectedDanceStyle: string | null;
+  onDanceStyleSelect: (danceStyle: string | null) => void;
+  liveFilter: boolean;
+  onLiveToggle: () => void;
+  liveDisabled?: boolean;
 };
 
-export function FilterPills({ selectedStyle, onStyleSelect }: Props) {
+export function FilterPills({
+  selectedDanceStyle,
+  onDanceStyleSelect,
+  liveFilter,
+  onLiveToggle,
+  liveDisabled,
+}: Props) {
   return (
-    <View style={styles.container}>
-      {/* "All" pill */}
-      <TouchableOpacity
-        style={[styles.pill, !selectedStyle && styles.pillActive]}
-        onPress={() => onStyleSelect(null)}
+    <View style={styles.row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.pillsContent}
+        style={styles.pillsScroll}
       >
-        <Text style={[styles.pillText, !selectedStyle && styles.pillTextActive]}>
-          הכל
-        </Text>
-      </TouchableOpacity>
+        <DanceStylePill
+          label="הכל"
+          active={!selectedDanceStyle}
+          onPress={() => onDanceStyleSelect(null)}
+        />
 
-      {DANCE_STYLES.map((style) => {
-        const isActive = selectedStyle === style;
-        return (
-          <TouchableOpacity
-            key={style}
-            style={[
-              styles.pill,
-              isActive && { backgroundColor: DanceStyleColors[style], borderColor: DanceStyleColors[style] },
-            ]}
-            onPress={() => onStyleSelect(isActive ? null : style)}
-          >
-            <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
-              {DANCE_STYLE_LABELS[style]}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+        {DANCE_STYLES.map((danceStyle) => (
+          <DanceStylePill
+            key={danceStyle}
+            label={DANCE_STYLE_LABELS[danceStyle]}
+            active={selectedDanceStyle === danceStyle}
+            onPress={() => onDanceStyleSelect(selectedDanceStyle === danceStyle ? null : danceStyle)}
+          />
+        ))}
+      </ScrollView>
+
+      <View style={styles.divider} />
+      <LiveToggle active={liveFilter} disabled={liveDisabled} onPress={onLiveToggle} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row-reverse',
+  row: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
     gap: 8,
+    marginTop: 14,
     paddingBottom: 8,
   },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  pillsScroll: {
+    flex: 1,
   },
-  pillActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+  pillsContent: {
+    flexDirection: "row-reverse",
+    gap: 8,
+    flexGrow: 1,
+    justifyContent: "flex-start",
   },
-  pillText: {
-    color: Colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  pillTextActive: {
-    color: '#fff',
-    fontWeight: '700',
+  divider: {
+    width: 1,
+    height: 20,
+    backgroundColor: Colors.border,
   },
 });
