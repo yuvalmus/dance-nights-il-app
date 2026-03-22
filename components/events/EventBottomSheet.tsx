@@ -13,12 +13,12 @@ export type SheetRef = {
 
 type Props = {
   events: EventWithVenue[];
-  eventDate: string;
   loading: boolean;
   selectedEventId: string | null;
   onEventSelect: (id: string | null) => void;
   headerComponent?: React.ReactNode;
   pollComponent?: React.ReactNode;
+  liveFilter?: boolean;
 };
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -29,12 +29,12 @@ const PEEK_HEIGHT =
 
 export const EventBottomSheet = forwardRef<SheetRef, Props>(({
   events,
-  eventDate,
   loading,
   selectedEventId,
   onEventSelect,
   headerComponent,
   pollComponent,
+  liveFilter,
 }, ref) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const isOpen = useRef(true);
@@ -86,12 +86,11 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
     ({ item }: { item: EventWithVenue }) => (
       <EventCard
         event={item}
-        eventDate={eventDate}
         isExpanded={selectedEventId === item.event_id}
         onPress={() => handleEventPress(item.event_id)}
       />
     ),
-    [selectedEventId, handleEventPress, eventDate],
+    [selectedEventId, handleEventPress],
   );
 
   return (
@@ -124,6 +123,7 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
             </Text>
             {pollComponent}
           </View>
+          {headerComponent}
         </View>
 
         {loading ? (
@@ -135,9 +135,10 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
             renderItem={renderItem}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
-            ListHeaderComponent={<>{headerComponent}</>}
             ListEmptyComponent={
-              <Text style={styles.empty}>אין אירועים בתאריך זה</Text>
+              <Text style={styles.empty}>
+                {liveFilter ? 'אין אירועים פעילים כרגע' : 'אין אירועים בתאריך זה'}
+              </Text>
             }
           />
         )}

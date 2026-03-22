@@ -22,6 +22,18 @@ export function getTodayKey(): string {
   return formatDateKey(new Date());
 }
 
+/** Whether we're in the midnight–5am boundary window (still partying from last night). */
+export function isInBoundaryWindow(): boolean {
+  return new Date().getHours() < DAY_BOUNDARY_HOUR;
+}
+
+/** Get last night's date key (yesterday). Used during the boundary window. */
+export function getLastNightKey(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return formatDateKey(d);
+}
+
 /**
  * Check whether an event is currently live.
  *

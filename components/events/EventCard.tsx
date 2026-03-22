@@ -12,17 +12,16 @@ import { PosterModal } from './card/PosterModal';
 
 type Props = {
   event: EventWithVenue;
-  eventDate: string;
   isExpanded: boolean;
   onPress: () => void;
 };
 
-export function EventCard({ event, eventDate, isExpanded, onPress }: Props) {
+export function EventCard({ event, isExpanded, onPress }: Props) {
   const [posterFullscreen, setPosterFullscreen] = useState(false);
   const accentColor = event.theme_color || Colors.primary;
   const distanceKm = (event.distance_meters / 1000).toFixed(1);
   const hasPoster = !!event.poster_url;
-  const live = isEventLive(eventDate, event.schedules?.[0]?.time);
+  const live = isEventLive(event.date, event.schedules?.[0]?.time);
 
   const levelBadges = useMemo(() => {
     if (!event.schedules || event.schedules.length === 0) return ['כל הרמות'];

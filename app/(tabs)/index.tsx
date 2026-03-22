@@ -8,13 +8,15 @@ import { DateToggle } from "@/components/map/DateToggle";
 import { EventBottomSheet, SheetRef } from "@/components/events/EventBottomSheet";
 import { FilterPills } from "@/components/events/FilterPills";
 import { PollButton } from "@/components/poll/PollButton";
+import { getTodayKey, isInBoundaryWindow, getLastNightKey } from "@/lib/date";
 
-const TODAY = getTodayKey();
+const BOUNDARY = isInBoundaryWindow();
+const INITIAL_DATE = BOUNDARY ? getLastNightKey() : getTodayKey();
 
 export default function TonightScreen() {
-  const [selectedDate, setSelectedDate] = useState(TODAY);
+  const [selectedDate, setSelectedDate] = useState(INITIAL_DATE);
   const [danceStyleFilter, setDanceStyleFilter] = useState<string | null>(null);
-  const [liveFilter, setLiveFilter] = useState(false);
+  const [liveFilter, setLiveFilter] = useState(BOUNDARY);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const sheetRef = useRef<SheetRef>(null);
   const navigation = useNavigation();
@@ -31,9 +33,15 @@ export default function TonightScreen() {
 
   const { events, loading, error, refetch } = useEvents(selectedDate);
   const filteredEvents = useMemo(
-    () => filterEvents(events, selectedDate, danceStyleFilter, liveFilter),
-    [events, selectedDate, danceStyleFilter, liveFilter],
+    () => filterEvents(events, danceStyleFilter, liveFilter),
+    [events, danceStyleFilter, liveFilter],
   );
+
+  const isTodaySelected = selectedDate === INITIAL_DATE;
+
+  useEffect(() => {
+    if (!isTodaySelected) setLiveFilter(false);
+  }, [isTodaySelected]);
 
   const toggleLiveFilter = useCallback(() => setLiveFilter((v) => !v), []);
 
@@ -51,17 +59,16 @@ export default function TonightScreen() {
 
       <DateToggle
         selectedDate={selectedDate}
-        todayString={TODAY}
         onDateSelect={setSelectedDate}
       />
 
       <EventBottomSheet
         ref={sheetRef}
         events={filteredEvents}
-        eventDate={selectedDate}
         loading={loading}
         selectedEventId={selectedEventId}
         onEventSelect={setSelectedEventId}
+        liveFilter={liveFilter}
         pollComponent={<PollButton date={selectedDate} />}
         headerComponent={
           <FilterPills
@@ -69,6 +76,7 @@ export default function TonightScreen() {
             onDanceStyleSelect={setDanceStyleFilter}
             liveFilter={liveFilter}
             onLiveToggle={toggleLiveFilter}
+            liveDisabled={!isTodaySelected}
           />
         }
       />

@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { Colors } from "@/constants/colors";
 import { DANCE_STYLES, DANCE_STYLE_LABELS } from "@/constants/config";
 import { DanceStylePill } from "./DanceStylePill";
@@ -9,6 +9,7 @@ type Props = {
   onDanceStyleSelect: (danceStyle: string | null) => void;
   liveFilter: boolean;
   onLiveToggle: () => void;
+  liveDisabled?: boolean;
 };
 
 export function FilterPills({
@@ -16,26 +17,34 @@ export function FilterPills({
   onDanceStyleSelect,
   liveFilter,
   onLiveToggle,
+  liveDisabled,
 }: Props) {
   return (
     <View style={styles.row}>
-      <DanceStylePill
-        label="הכל"
-        active={!selectedDanceStyle}
-        onPress={() => onDanceStyleSelect(null)}
-      />
-
-      {DANCE_STYLES.map((danceStyle) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.pillsContent}
+        style={styles.pillsScroll}
+      >
         <DanceStylePill
-          key={danceStyle}
-          label={DANCE_STYLE_LABELS[danceStyle]}
-          active={selectedDanceStyle === danceStyle}
-          onPress={() => onDanceStyleSelect(selectedDanceStyle === danceStyle ? null : danceStyle)}
+          label="הכל"
+          active={!selectedDanceStyle}
+          onPress={() => onDanceStyleSelect(null)}
         />
-      ))}
+
+        {DANCE_STYLES.map((danceStyle) => (
+          <DanceStylePill
+            key={danceStyle}
+            label={DANCE_STYLE_LABELS[danceStyle]}
+            active={selectedDanceStyle === danceStyle}
+            onPress={() => onDanceStyleSelect(selectedDanceStyle === danceStyle ? null : danceStyle)}
+          />
+        ))}
+      </ScrollView>
 
       <View style={styles.divider} />
-      <LiveToggle active={liveFilter} onPress={onLiveToggle} />
+      <LiveToggle active={liveFilter} disabled={liveDisabled} onPress={onLiveToggle} />
     </View>
   );
 }
@@ -45,8 +54,17 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     alignItems: "center",
     gap: 8,
-    marginTop: 8,
+    marginTop: 14,
     paddingBottom: 8,
+  },
+  pillsScroll: {
+    flex: 1,
+  },
+  pillsContent: {
+    flexDirection: "row-reverse",
+    gap: 8,
+    flexGrow: 1,
+    justifyContent: "flex-start",
   },
   divider: {
     width: 1,

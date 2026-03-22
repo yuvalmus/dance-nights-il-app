@@ -3,17 +3,23 @@ import { Colors } from "@/constants/colors";
 
 type Props = {
   active: boolean;
+  disabled?: boolean;
   onPress: () => void;
 };
 
-export function LiveToggle({ active, onPress }: Props) {
+export function LiveToggle({ active, disabled, onPress }: Props) {
   return (
     <TouchableOpacity
-      style={[styles.toggle, active && styles.toggleActive]}
+      style={[
+        styles.toggle,
+        active && !disabled && styles.toggleActive,
+        disabled && styles.toggleDisabled,
+      ]}
       onPress={onPress}
+      disabled={disabled}
     >
-      <View style={[styles.dot, !active && styles.dotMuted]} />
-      <Text style={[styles.text, !active && styles.textMuted]}>LIVE</Text>
+      <View style={[styles.dot, (!active || disabled) && styles.dotMuted]} />
+      <Text style={[styles.text, (!active || disabled) && styles.textMuted]}>LIVE</Text>
     </TouchableOpacity>
   );
 }
@@ -33,6 +39,11 @@ const styles = StyleSheet.create({
   toggleActive: {
     backgroundColor: "rgba(239,68,68,0.2)",
     borderColor: "rgba(239,68,68,0.5)",
+  },
+  toggleDisabled: {
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
+    opacity: 0.4,
   },
   dot: {
     width: 6,

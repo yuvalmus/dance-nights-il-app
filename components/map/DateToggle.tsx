@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@/components/ui/Icon";
 import { Colors } from "@/constants/colors";
 import { DATE_RIBBON_DAYS } from "@/constants/config";
-import { formatDateKey } from "@/lib/date";
+import { formatDateKey, isInBoundaryWindow } from "@/lib/date";
 import { DateChip } from "./DateChip";
 
 const DAY_NAMES_HE = [
@@ -33,6 +33,31 @@ const DAY_NAMES_HE = [
 
 function buildDates(count: number) {
   const today = new Date();
+  const boundary = isInBoundaryWindow();
+
+  if (boundary) {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const lastNight = {
+      date: formatDateKey(yesterday),
+      label: "הלילה",
+      num: yesterday.getDate(),
+    };
+
+    const forward = Array.from({ length: count }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      return {
+        date: formatDateKey(d),
+        label: i === 0 ? "מחר" : DAY_NAMES_HE[d.getDay()],
+        num: d.getDate(),
+      };
+    });
+
+    return [lastNight, ...forward];
+  }
+
   return Array.from({ length: count }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
@@ -46,7 +71,6 @@ function buildDates(count: number) {
 
 type Props = {
   selectedDate: string;
-  todayString: string;
   onDateSelect: (date: string) => void;
 };
 
@@ -54,12 +78,12 @@ const ANIM_MS = 250;
 const BTN_SIZE = 44;
 const CARD_WIDTH = 210;
 
-export function DateToggle({ selectedDate, todayString, onDateSelect }: Props) {
+export function DateToggle({ selectedDate, onDateSelect }: Props) {
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const dates = useMemo(() => buildDates(DATE_RIBBON_DAYS), []);
 
-  const isToday = selectedDate === todayString;
+  const isDefaultDate = selectedDate === dates[0]?.date;
   const progress = useSharedValue(0);
 
   const animateTo = useCallback((target: number) => {
@@ -120,7 +144,7 @@ export function DateToggle({ selectedDate, todayString, onDateSelect }: Props) {
             size={20}
             color={open ? Colors.background : Colors.text}
           />
-          {!isToday && !open && <View style={styles.dot} />}
+          {!isDefaultDate && !open && <View style={styles.dot} />}
         </TouchableOpacity>
 
         <Animated.View

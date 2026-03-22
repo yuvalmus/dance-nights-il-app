@@ -201,6 +201,7 @@ export type Course = Database['public']['Tables']['courses']['Row'];
 // The shape returned by the get_events_by_date_and_distance RPC
 export type EventWithVenue = {
   event_id: string;
+  date: string;
   title: string;
   description: string | null;
   dance_styles: string[];

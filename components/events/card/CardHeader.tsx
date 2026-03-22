@@ -18,12 +18,10 @@ export function CardHeader({ event, accentColor, levelBadges, distanceKm, isLive
     <>
       <View style={styles.titleRow}>
         <View style={styles.titleInfo}>
-          <View style={styles.titleLine}>
-            <Text style={styles.title}>{event.title}</Text>
-            {isLive && <LiveBadge />}
-          </View>
+          <Text style={styles.title}>{event.title}</Text>
           <Text style={[styles.venue, { color: accentColor }]}>{event.venue_name}</Text>
         </View>
+        {isLive && <LiveBadge />}
         <View style={styles.distanceBox}>
           <Text style={styles.distanceNum}>{distanceKm}</Text>
           <Text style={styles.distanceUnit}>ק״מ</Text>
@@ -46,19 +44,14 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: 14,
     paddingTop: 12,
+    gap: 10,
   },
   titleInfo: {
     flex: 1,
     alignItems: 'flex-end',
-    marginLeft: 10,
-  },
-  titleLine: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: 8,
   },
   title: {
     color: Colors.text,
