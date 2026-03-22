@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@/components/ui/Icon';
-import { Colors, DanceStyleColors } from '@/constants/colors';
+import { Colors } from '@/constants/colors';
 import { Course } from '@/types/database';
 import { DANCE_STYLE_LABELS } from '@/constants/config';
 
@@ -22,7 +22,6 @@ export function CourseCard({ course }: Props) {
 
   return (
     <View style={styles.card}>
-      {/* Poster */}
       {course.poster_url && (
         <Image
           source={{ uri: course.poster_url }}
@@ -33,7 +32,6 @@ export function CourseCard({ course }: Props) {
       )}
 
       <View style={styles.content}>
-        {/* Type badge */}
         <View style={styles.typeBadge}>
           <Text style={styles.typeBadgeText}>{TYPE_LABELS[course.type] ?? course.type}</Text>
         </View>
@@ -52,13 +50,12 @@ export function CourseCard({ course }: Props) {
           {course.price && <Text style={styles.price}>{course.price}</Text>}
         </View>
 
-        {/* Style tags */}
         {course.dance_styles.length > 0 && (
           <View style={styles.tags}>
             {course.dance_styles.map((s) => (
               <View
                 key={s}
-                style={[styles.tag, { backgroundColor: DanceStyleColors[s] ?? Colors.primary }]}
+                style={[styles.tag, { backgroundColor: Colors.primary }]}
               >
                 <Text style={styles.tagText}>
                   {DANCE_STYLE_LABELS[s as keyof typeof DANCE_STYLE_LABELS] ?? s}
@@ -68,7 +65,6 @@ export function CourseCard({ course }: Props) {
           </View>
         )}
 
-        {/* Register CTA */}
         {course.registration_url && (
           <TouchableOpacity style={styles.cta} onPress={openRegistration}>
             <Text style={styles.ctaText}>הרשמה</Text>

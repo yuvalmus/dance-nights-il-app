@@ -15,11 +15,6 @@ export const Colors = {
   textSecondary: '#a0a0b0',
   textMuted: '#6c6c7c',
 
-  // Dance styles
-  bachata: '#e74c3c',
-  salsa: '#2ecc71',
-  zouk: '#9b59b6',
-
   // Status
   success: '#2ecc71',
   warning: '#f39c12',
@@ -34,10 +29,4 @@ export const Colors = {
   // Map
   mapPin: '#d4a017',
   mapPinSelected: '#e6b422',
-};
-
-export const DanceStyleColors: Record<string, string> = {
-  bachata: Colors.bachata,
-  salsa: Colors.salsa,
-  zouk: Colors.zouk,
 };

@@ -36,7 +36,6 @@ export function PollModal({ date, visible, onClose }: Props) {
     >
       <Pressable style={styles.overlay} onPress={onClose}>
         <View style={styles.sheet} onStartShouldSetResponder={() => true}>
-          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={Colors.text} />
@@ -44,7 +43,6 @@ export function PollModal({ date, visible, onClose }: Props) {
             <Text style={styles.title}>{poll.title}</Text>
           </View>
 
-          {/* Options */}
           {poll.poll_options
             ?.sort((a, b) => a.sort_order - b.sort_order)
             .map((option) => {
@@ -58,7 +56,6 @@ export function PollModal({ date, visible, onClose }: Props) {
                   onPress={() => handleVote(option.id)}
                   disabled={hasVoted || votingLoading}
                 >
-                  {/* Progress background */}
                   {hasVoted && (
                     <View
                       style={[
@@ -78,7 +75,6 @@ export function PollModal({ date, visible, onClose }: Props) {
               );
             })}
 
-          {/* Footer */}
           <Text style={styles.footer}>
             {hasVoted
               ? `${totalVotes} הצבעות`

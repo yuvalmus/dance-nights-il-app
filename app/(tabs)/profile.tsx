@@ -32,12 +32,12 @@ export default function ProfileScreen() {
     );
   }
 
-  const toggleStyle = async (style: string) => {
+  const toggleDanceStyle = async (danceStyle: string) => {
     if (!profile) return;
     const current = profile.dance_styles || [];
-    const updated = current.includes(style)
-      ? current.filter((s) => s !== style)
-      : [...current, style];
+    const updated = current.includes(danceStyle)
+      ? current.filter((s) => s !== danceStyle)
+      : [...current, danceStyle];
     await updateProfile({ dance_styles: updated });
   };
 
@@ -88,22 +88,22 @@ export default function ProfileScreen() {
         {/* Dance styles */}
         <Text style={styles.sectionTitle}>סגנונות ריקוד</Text>
         <View style={styles.pillRow}>
-          {DANCE_STYLES.map((style) => (
+          {DANCE_STYLES.map((danceStyle) => (
             <TouchableOpacity
-              key={style}
+              key={danceStyle}
               style={[
                 styles.pill,
-                profile?.dance_styles?.includes(style) && styles.pillActive,
+                profile?.dance_styles?.includes(danceStyle) && styles.pillActive,
               ]}
-              onPress={() => toggleStyle(style)}
+              onPress={() => toggleDanceStyle(danceStyle)}
             >
               <Text
                 style={[
                   styles.pillText,
-                  profile?.dance_styles?.includes(style) && styles.pillTextActive,
+                  profile?.dance_styles?.includes(danceStyle) && styles.pillTextActive,
                 ]}
               >
-                {DANCE_STYLE_LABELS[style]}
+                {DANCE_STYLE_LABELS[danceStyle]}
               </Text>
             </TouchableOpacity>
           ))}
