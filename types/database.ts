@@ -214,6 +214,7 @@ export type EventWithVenue = {
   spots_total: number | null;
   spots_taken: number;
   venue_name: string;
+  venue_slug: string;
   address: string;
   city: string;
   venue_lat: number;

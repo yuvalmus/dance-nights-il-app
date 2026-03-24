@@ -17,7 +17,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.noche.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Noche uses your location to show nearby dance events and calculate distances."
+        "NSLocationWhenInUseUsageDescription": "Noche uses your location to show nearby dance events and calculate distances.",
+        "LSApplicationQueriesSchemes": ["waze", "comgooglemaps"]
       }
     },
     "android": {

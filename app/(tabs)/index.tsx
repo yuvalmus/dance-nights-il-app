@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { useEvents, filterEvents } from "@/hooks/useEvents";
-import { EventMap } from "@/components/map/EventMap";
+import { EventMap, MapRef } from "@/components/map/EventMap";
 import { DateToggle } from "@/components/map/DateToggle";
 import { EventBottomSheet, SheetRef } from "@/components/events/EventBottomSheet";
 import { FilterPills } from "@/components/events/FilterPills";
@@ -19,9 +19,10 @@ export default function TonightScreen() {
   const [liveFilter, setLiveFilter] = useState(BOUNDARY);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const sheetRef = useRef<SheetRef>(null);
+  const mapRef = useRef<MapRef>(null);
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
-  // Toggle sheet when center tab is pressed while already focused
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
       if (navigation.isFocused()) {
@@ -31,7 +32,7 @@ export default function TonightScreen() {
     return unsubscribe;
   }, [navigation]);
 
-  const { events, loading, error, refetch } = useEvents(selectedDate);
+  const { events, loading } = useEvents(selectedDate);
   const filteredEvents = useMemo(
     () => filterEvents(events, danceStyleFilter, liveFilter),
     [events, danceStyleFilter, liveFilter],
@@ -43,10 +44,32 @@ export default function TonightScreen() {
     if (!isTodaySelected) setLiveFilter(false);
   }, [isTodaySelected]);
 
+  // Center map when an event is selected
+  useEffect(() => {
+    if (!selectedEventId) return;
+    const event = filteredEvents.find((e) => e.event_id === selectedEventId);
+    if (event) {
+      mapRef.current?.centerOn(event.venue_lat, event.venue_lng);
+    }
+  }, [selectedEventId, filteredEvents]);
+
   const toggleLiveFilter = useCallback(() => setLiveFilter((v) => !v), []);
 
   const handlePinPress = useCallback((eventId: string) => {
     setSelectedEventId(eventId);
+  }, []);
+
+  const handleMapPress = useCallback(() => {
+    setSelectedEventId(null);
+  }, []);
+
+  const handleMapPan = useCallback(() => {
+    sheetRef.current?.peek();
+  }, []);
+
+  const handleFitAll = useCallback(() => {
+    setSelectedEventId(null);
+    mapRef.current?.fitAll();
   }, []);
 
   return (
@@ -54,13 +77,26 @@ export default function TonightScreen() {
       <EventMap
         events={filteredEvents}
         selectedEventId={selectedEventId}
-        onPinPress={handlePinPress}
-      />
+        <EventMap
+          ref={mapRef}
+          events={filteredEvents}
+          selectedEventId={selectedEventId}
+          onPinPress={handlePinPress}
+          onMapPress={handleMapPress}
+          onMapPan={handleMapPan}
+        />
 
       <DateToggle
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate}
       />
+        <TouchableOpacity
+          style={[styles.fitButton, { top: insets.top + 62 }]}
+          onPress={handleFitAll}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="locate-outline" size={20} color={Colors.text} />
+        </TouchableOpacity>
 
       <EventBottomSheet
         ref={sheetRef}
@@ -88,5 +124,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  fitButton: {
+    position: "absolute",
+    right: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });
