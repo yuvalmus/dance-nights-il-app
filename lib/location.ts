@@ -31,11 +31,4 @@ export async function getUserLocation(): Promise<UserLocation> {
   }
 }
 
-export function formatDistance(meters: number): string {
-  if (meters < 1000) {
-    return `${Math.round(meters)} מ'`;
-  }
-  return `${(meters / 1000).toFixed(1)} ק"מ`;
-}
-
 export { DEFAULT_LOCATION };

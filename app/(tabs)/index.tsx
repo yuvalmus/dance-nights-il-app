@@ -4,7 +4,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@/components/ui/Icon";
 import { useNavigation } from "expo-router";
 import { Colors } from "@/constants/colors";
-import { useEvents, filterEvents } from "@/hooks/useEvents";
+import { useEvents } from "@/hooks/useEvents";
+import { filterEvents } from "@/lib/eventFilters";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { EventMap, MapRef } from "@/components/map/EventMap";
 import { DateToggle } from "@/components/map/DateToggle";
 import { EventBottomSheet, SheetRef } from "@/components/events/EventBottomSheet";
@@ -35,10 +37,16 @@ export default function TonightScreen() {
   }, [navigation]);
 
   const { events, loading } = useEvents(selectedDate);
+  const userLocation = useUserLocation();
   const filteredEvents = useMemo(
     () => filterEvents(events, danceStyleFilter, liveFilter),
     [events, danceStyleFilter, liveFilter],
   );
+
+  // Reset selected event when filters change so stale selections don't mess up centering
+  useEffect(() => {
+    setSelectedEventId(null);
+  }, [danceStyleFilter, liveFilter]);
 
   const isTodaySelected = selectedDate === INITIAL_DATE;
 
@@ -86,6 +94,7 @@ export default function TonightScreen() {
           onPinPress={handlePinPress}
           onMapPress={handleMapPress}
           onMapPan={handleMapPan}
+          userLocation={userLocation}
         />
 
       <DateToggle

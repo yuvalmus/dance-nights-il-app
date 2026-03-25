@@ -14,6 +14,7 @@ import MapView, {
   MapStyleElement,
 } from "react-native-maps";
 import { EventWithVenue } from "@/types/database";
+import { UserLocation } from "@/lib/location";
 import { MAP_CONFIG } from "@/constants/config";
 import { getVenueLogo } from "@/constants/venueLogos";
 import { EventPinIOS } from "./EventPinIOS";
@@ -35,15 +36,32 @@ type Props = {
   onPinPress: (eventId: string) => void;
   onMapPress: () => void;
   onMapPan: () => void;
+  userLocation?: UserLocation | null;
 };
 
 export const EventMap = forwardRef<MapRef, Props>(
-  ({ events, selectedEventId, onPinPress, onMapPress, onMapPan }, ref) => {
+  ({ events, selectedEventId, onPinPress, onMapPress, onMapPan, userLocation }, ref) => {
     const mapRef = useRef<MapView>(null);
     const markerJustPressed = useRef(false);
 
     const fitAllMarkers = useCallback(() => {
-      if (events.length === 0 || !mapRef.current) return;
+      if (!mapRef.current) return;
+
+      // No events — center on user's location if available, otherwise stay put
+      if (events.length === 0) {
+        if (userLocation) {
+          mapRef.current.animateToRegion(
+            {
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            },
+            400,
+          );
+        }
+        return;
+      }
 
       const lats = events.map((e) => e.venue_lat);
       const lngs = events.map((e) => e.venue_lng);
@@ -65,7 +83,7 @@ export const EventMap = forwardRef<MapRef, Props>(
         },
         400,
       );
-    }, [events]);
+    }, [events, userLocation]);
 
     useImperativeHandle(
       ref,
@@ -97,7 +115,12 @@ export const EventMap = forwardRef<MapRef, Props>(
         provider={
           Platform.OS === "android" ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
         }
-        initialRegion={MAP_CONFIG.initialRegion}
+        initialRegion={userLocation ? {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        } : MAP_CONFIG.initialRegion}
         showsUserLocation
         showsCompass={false}
         showsMyLocationButton={false}
