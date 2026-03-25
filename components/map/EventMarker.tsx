@@ -1,6 +1,6 @@
 import { getVenueLogo } from "@/constants/venueLogos";
 import { EventWithVenue } from "@/types/database";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { EventPinAndroid } from "./EventPinAndroid";
 import { EventPinIOS } from "./EventPinIOS";
@@ -17,20 +17,16 @@ function EventMarker({
   isSelected: boolean;
   onPress: () => void;
 }) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [bitmapReady, setBitmapReady] = useState(!IS_ANDROID);
   const logo = getVenueLogo(event.venue_slug);
   const themeColor = event.theme_color || "#d4a017";
 
-  const onImageLoad = useCallback(() => {
-    if (IS_ANDROID) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setImageLoaded(true);
-        });
-      });
-    } else {
-      setImageLoaded(true);
-    }
+  // On Android, keep tracksViewChanges on for 500ms to let the bitmap
+  // capture the fully rendered view (circle + image), then freeze it.
+  useEffect(() => {
+    if (!IS_ANDROID) return;
+    const timer = setTimeout(() => setBitmapReady(true), 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -40,7 +36,7 @@ function EventMarker({
         longitude: event.venue_lng,
       }}
       onPress={onPress}
-      tracksViewChanges={IS_ANDROID && !imageLoaded}
+      tracksViewChanges={!bitmapReady}
     >
       {IS_ANDROID ? (
         <EventPinAndroid
@@ -48,7 +44,6 @@ function EventMarker({
           logo={logo}
           themeColor={themeColor}
           isSelected={isSelected}
-          onImageLoad={onImageLoad}
         />
       ) : (
         <EventPinIOS

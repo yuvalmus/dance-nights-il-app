@@ -1,5 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@/components/ui/Icon";
 import { useNavigation } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { useEvents, filterEvents } from "@/hooks/useEvents";

@@ -1,85 +1,77 @@
-import { View, Text, Image, StyleSheet, ImageSourcePropType } from 'react-native';
+import { View, Text, Image, ImageSourcePropType } from 'react-native';
 import { Colors } from '@/constants/colors';
 
 const PIN_SIZE = 56;
+const SELECTED_PIN_SIZE = 67;
 const BORDER_WIDTH = 3;
-const IMAGE_SIZE = PIN_SIZE - BORDER_WIDTH * 2;
-const SELECTED_SCALE = 1.2;
+const ARROW_WIDTH = 7;
+const ARROW_HEIGHT = 8;
 
 type Props = {
   name: string;
   logo: ImageSourcePropType | null;
   themeColor: string;
   isSelected: boolean;
-  onImageLoad?: () => void;
 };
 
-export function EventPinAndroid({ name, logo, themeColor, isSelected, onImageLoad }: Props) {
+export function EventPinAndroid({ name, logo, themeColor, isSelected }: Props) {
   const borderColor = isSelected ? Colors.primary : themeColor;
+  const size = isSelected ? SELECTED_PIN_SIZE : PIN_SIZE;
+  const containerWidth = size + 8;
+  const containerHeight = size + 8 + ARROW_HEIGHT;
 
-  if (!logo) {
-    return (
-      <View style={[styles.container, isSelected && styles.selected]} collapsable={false}>
-        <View
-          style={[
-            styles.circle,
-            { borderColor, backgroundColor: Colors.surface },
-          ]}
-          collapsable={false}
-        >
-          <Text style={styles.initial}>{name.charAt(0)}</Text>
-        </View>
-      </View>
-    );
-  }
+  const circle = logo ? (
+    <Image
+      source={logo}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: BORDER_WIDTH,
+        borderColor,
+        backgroundColor: Colors.surface,
+      }}
+      resizeMode="cover"
+    />
+  ) : (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: BORDER_WIDTH,
+        borderColor,
+        backgroundColor: Colors.surface,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text style={{
+        color: Colors.text,
+        fontSize: isSelected ? 26 : 22,
+        fontWeight: '800',
+      }}>{name.charAt(0)}</Text>
+    </View>
+  );
 
   return (
-    <View style={[styles.container, isSelected && styles.selected]} collapsable={false}>
-      <View
-        style={[
-          styles.circle,
-          { borderColor, backgroundColor: Colors.surface },
-        ]}
-        collapsable={false}
-      >
-        <Image
-          source={logo}
-          style={styles.logoImage}
-          resizeMode="cover"
-          onLoad={onImageLoad}
-        />
-      </View>
+    <View style={{
+      width: containerWidth,
+      height: containerHeight,
+      alignItems: 'center',
+      }}>
+      {circle}
+      <View style={{
+        width: 0,
+        height: 0,
+        borderLeftWidth: ARROW_WIDTH,
+        borderRightWidth: ARROW_WIDTH,
+        borderTopWidth: ARROW_HEIGHT,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: borderColor,
+        marginTop: -1,
+      }} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: PIN_SIZE + 8,
-    height: PIN_SIZE + 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selected: {
-    transform: [{ scale: SELECTED_SCALE }],
-  },
-  circle: {
-    width: PIN_SIZE,
-    height: PIN_SIZE,
-    borderRadius: PIN_SIZE / 2,
-    borderWidth: BORDER_WIDTH,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  logoImage: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: IMAGE_SIZE / 2,
-  },
-  initial: {
-    color: Colors.text,
-    fontSize: 22,
-    fontWeight: '800',
-  },
-});
