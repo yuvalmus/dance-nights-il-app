@@ -43,27 +43,32 @@ export default function TonightScreen() {
     [events, danceStyleFilter, liveFilter],
   );
 
-  // Reset selected event when filters change so stale selections don't mess up centering
-  useEffect(() => {
-    setSelectedEventId(null);
-  }, [danceStyleFilter, liveFilter]);
-
   const isTodaySelected = selectedDate === INITIAL_DATE;
 
   useEffect(() => {
     if (!isTodaySelected) setLiveFilter(false);
   }, [isTodaySelected]);
 
-  // Center map when an event is selected
+  // Center map when an event is selected (only reacts to selectedEventId changes,
+  // NOT filteredEvents changes, so filter switches don't re-center on stale selection)
   useEffect(() => {
     if (!selectedEventId) return;
     const event = filteredEvents.find((e) => e.event_id === selectedEventId);
     if (event) {
       mapRef.current?.centerOn(event.venue_lat, event.venue_lng);
     }
-  }, [selectedEventId, filteredEvents]);
+  }, [selectedEventId]);
 
-  const toggleLiveFilter = useCallback(() => setLiveFilter((v) => !v), []);
+  // Reset selection synchronously when filters change (batched in same render)
+  const handleDanceStyleFilter = useCallback((style: string | null) => {
+    setDanceStyleFilter(style);
+    setSelectedEventId(null);
+  }, []);
+
+  const toggleLiveFilter = useCallback(() => {
+    setLiveFilter((v) => !v);
+    setSelectedEventId(null);
+  }, []);
 
   const handlePinPress = useCallback((eventId: string) => {
     setSelectedEventId(eventId);
@@ -120,7 +125,7 @@ export default function TonightScreen() {
         headerComponent={
           <FilterPills
             selectedDanceStyle={danceStyleFilter}
-            onDanceStyleSelect={setDanceStyleFilter}
+            onDanceStyleSelect={handleDanceStyleFilter}
             liveFilter={liveFilter}
             onLiveToggle={toggleLiveFilter}
             liveDisabled={!isTodaySelected}
