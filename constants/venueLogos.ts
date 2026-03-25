@@ -11,6 +11,7 @@ const VENUE_LOGOS: Record<string, ImageSourcePropType> = {
   'capital-latina': require('@/assets/venues/CapitalLatina.png'),
   'zoukera': require('@/assets/venues/Zoukera.png'),
   'be-bachata': require('@/assets/venues/BeBachata.png'),
+  'havana': require('@/assets/venues/Havana.png'),
 };
 
 export function getVenueLogo(venueSlug: string): ImageSourcePropType | null {
