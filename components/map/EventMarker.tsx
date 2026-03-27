@@ -1,5 +1,6 @@
 import { getVenueLogo } from "@/constants/venueLogos";
 import { EventWithVenue } from "@/types/database";
+import { Colors } from "@/constants/colors";
 import { useState, useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { EventPinAndroid } from "./EventPinAndroid";
@@ -19,7 +20,7 @@ function EventMarker({
 }) {
   const [bitmapReady, setBitmapReady] = useState(!IS_ANDROID);
   const logo = getVenueLogo(event.venue_slug);
-  const themeColor = event.theme_color || "#d4a017";
+  const themeColors = event.theme_colors?.length ? event.theme_colors : [Colors.primary];
 
   // On Android, keep tracksViewChanges on for 500ms to let the bitmap
   // capture the fully rendered view (circle + image), then freeze it.
@@ -42,14 +43,14 @@ function EventMarker({
         <EventPinAndroid
           name={event.venue_name}
           logo={logo}
-          themeColor={themeColor}
+          themeColors={themeColors}
           isSelected={isSelected}
         />
       ) : (
         <EventPinIOS
           name={event.venue_name}
           logo={logo}
-          themeColor={themeColor}
+          themeColors={themeColors}
           isSelected={isSelected}
         />
       )}

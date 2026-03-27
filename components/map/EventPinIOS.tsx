@@ -1,40 +1,44 @@
 import { View, Text, StyleSheet, ImageSourcePropType } from "react-native";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/colors";
 
 const PIN_SIZE = 60;
 const BORDER_WIDTH = 2.5;
-const LOGO_SIZE = PIN_SIZE - BORDER_WIDTH * 2 - 4;
+const INNER_SIZE = PIN_SIZE - BORDER_WIDTH * 2;
+const LOGO_SIZE = INNER_SIZE - 4;
 const SELECTED_SCALE = 1.2;
 
 type Props = {
   name: string;
   logo: ImageSourcePropType | null;
-  themeColor: string;
+  themeColors: string[];
   isSelected: boolean;
 };
 
-export function EventPinIOS({ name, logo, themeColor, isSelected }: Props) {
-  const borderColor = isSelected ? Colors.primary : themeColor;
+export function EventPinIOS({ name, logo, themeColors, isSelected }: Props) {
+  const colors = isSelected ? [Colors.primary, Colors.primary] : themeColors;
+  const arrowColor = isSelected ? Colors.primary : themeColors[themeColors.length - 1];
 
   return (
     <View style={[styles.container, isSelected && styles.containerSelected]}>
-      <View
-        style={[
-          styles.circle,
-          { borderColor },
-          isSelected && styles.circleSelected,
-        ]}
+      <LinearGradient
+        colors={colors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.gradientRing, isSelected && styles.ringSelected]}
       >
-        {logo ? (
-          <Image source={logo} style={styles.logo} contentFit="contain" />
-        ) : (
-          <Text style={styles.initial} numberOfLines={1}>
-            {name.charAt(0)}
-          </Text>
-        )}
-      </View>
-      <View style={[styles.arrow, { borderTopColor: borderColor }]} />
+        <View style={styles.innerCircle}>
+          {logo ? (
+            <Image source={logo} style={styles.logo} contentFit="contain" />
+          ) : (
+            <Text style={styles.initial} numberOfLines={1}>
+              {name.charAt(0)}
+            </Text>
+          )}
+        </View>
+      </LinearGradient>
+      <View style={[styles.arrow, { borderTopColor: arrowColor }]} />
     </View>
   );
 }
@@ -46,22 +50,28 @@ const styles = StyleSheet.create({
   containerSelected: {
     transform: [{ scale: SELECTED_SCALE }],
   },
-  circle: {
+  gradientRing: {
     width: PIN_SIZE,
     height: PIN_SIZE,
     borderRadius: PIN_SIZE / 2,
-    borderWidth: BORDER_WIDTH,
-    backgroundColor: Colors.surface,
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
   },
-  circleSelected: {
+  ringSelected: {
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 8,
     elevation: 10,
+  },
+  innerCircle: {
+    width: INNER_SIZE,
+    height: INNER_SIZE,
+    borderRadius: INNER_SIZE / 2,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
   logo: {
     width: LOGO_SIZE,
