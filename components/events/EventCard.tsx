@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
-import { TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
 import { DANCE_LEVEL_LABELS } from '@/constants/config';
@@ -19,7 +20,8 @@ type Props = {
 
 export function EventCard({ event, isExpanded, onPress }: Props) {
   const [posterFullscreen, setPosterFullscreen] = useState(false);
-  const accentColor = event.theme_color || Colors.primary;
+  const themeColors = event.theme_colors?.length ? event.theme_colors : [Colors.primary];
+  const accentColor = themeColors[0];
   const distanceKm = (event.distance_meters / 1000).toFixed(1);
   const hasPoster = !!event.poster_url;
   const hasCoordinates = !!(event.venue_lat && event.venue_lng);
@@ -50,12 +52,19 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
       <TouchableOpacity
         style={[
           styles.card,
-          { borderLeftColor: accentColor, borderLeftWidth: 3 },
-          isExpanded && { borderColor: accentColor, borderWidth: 1, borderLeftWidth: 3 },
+          isExpanded && { borderColor: accentColor, borderWidth: 1 },
         ]}
         onPress={onPress}
         activeOpacity={0.85}
       >
+        {/* Gradient left accent strip */}
+        <LinearGradient
+          colors={themeColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.leftStrip}
+        />
+
         {isExpanded && hasPoster && (
           <HeroPoster
             posterUrl={event.poster_url!}
@@ -105,5 +114,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  leftStrip: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    borderTopLeftRadius: 14,
+    borderBottomLeftRadius: 14,
   },
 });

@@ -9,6 +9,7 @@ import { EventCard } from './EventCard';
 
 export type SheetRef = {
   toggle: () => void;
+  peek: () => void;
 };
 
 type Props = {
@@ -23,7 +24,6 @@ type Props = {
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-// Peek must clear the center button (curveRise + circleSize/2 above the flat bar edge)
 const PEEK_HEIGHT =
   TAB_BAR_CONFIG.curveRise + TAB_BAR_CONFIG.circleSize / 2;
 
@@ -37,6 +37,7 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
   liveFilter,
 }, ref) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const flatListRef = useRef<any>(null);
   const isOpen = useRef(true);
   const insets = useSafeAreaInsets();
 
@@ -44,14 +45,15 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
   const pullTabBottom = TAB_BAR_CONFIG.barHeight + TAB_BAR_CONFIG.curveRise + insets.bottom;
 
   const snapPoints = useMemo(() => {
-    const mid = SCREEN_HEIGHT * 0.5 - bottomInset;
-    const full = SCREEN_HEIGHT * 0.85 - bottomInset;
-    return [PEEK_HEIGHT, mid, full];
+    const available = SCREEN_HEIGHT - bottomInset;
+    const mid = available * 0.45;
+    const full = available * 0.85;
+    return [PEEK_HEIGHT, Math.max(mid, PEEK_HEIGHT + 50), Math.max(full, PEEK_HEIGHT + 100)];
   }, [bottomInset]);
 
   const openSheet = useCallback(() => {
     isOpen.current = true;
-    bottomSheetRef.current?.snapToIndex(selectedEventId ? 2 : 1);
+    bottomSheetRef.current?.snapToIndex(selectedEventId ? 1 : 1);
   }, [selectedEventId]);
 
   useImperativeHandle(ref, () => ({
@@ -63,6 +65,10 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
         openSheet();
       }
     },
+    peek() {
+      isOpen.current = true;
+      bottomSheetRef.current?.snapToIndex(0);
+    },
   }), [openSheet]);
 
   const handleSheetChange = useCallback((index: number) => {
@@ -70,10 +76,17 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
   }, []);
 
   useEffect(() => {
-    if (selectedEventId) {
-      bottomSheetRef.current?.snapToIndex(2);
+    if (!selectedEventId) return;
+
+    bottomSheetRef.current?.snapToIndex(1);
+
+    const eventIndex = events.findIndex((e) => e.event_id === selectedEventId);
+    if (eventIndex >= 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({ index: eventIndex, animated: true, viewOffset: 8 });
+      }, 300);
     }
-  }, [selectedEventId]);
+  }, [selectedEventId, events]);
 
   const handleEventPress = useCallback(
     (id: string) => {
@@ -130,6 +143,7 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
           <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
         ) : (
           <BottomSheetFlatList
+            ref={flatListRef}
             data={events}
             keyExtractor={(item) => item.event_id}
             renderItem={renderItem}

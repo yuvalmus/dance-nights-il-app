@@ -20,7 +20,7 @@ export interface Database {
           location: unknown; // PostGIS geography type
           parking_info: string | null;
           has_shelter: boolean;
-          theme_color: string;
+          theme_colors: string[];
           logo_url: string | null;
           instagram_url: string | null;
           booking_url: string | null;
@@ -214,13 +214,14 @@ export type EventWithVenue = {
   spots_total: number | null;
   spots_taken: number;
   venue_name: string;
+  venue_slug: string;
   address: string;
   city: string;
   venue_lat: number;
   venue_lng: number;
   parking_info: string | null;
   has_shelter: boolean;
-  theme_color: string;
+  theme_colors: string[];
   distance_meters: number;
   schedules: ScheduleEntry[] | null;
   instructors: string[];
