@@ -17,15 +17,14 @@ type Props = {
 };
 
 export function EventPinIOS({ name, logo, themeColors, isSelected }: Props) {
-  const colors = isSelected ? [Colors.primary, Colors.primary] : themeColors;
-  const arrowColor = isSelected ? Colors.primary : themeColors[themeColors.length - 1];
+  const arrowColor = themeColors[themeColors.length - 1];
 
   return (
     <View style={[styles.container, isSelected && styles.containerSelected]}>
       <LinearGradient
-        colors={colors}
+        colors={themeColors}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0, y: 1 }}
         style={[styles.gradientRing, isSelected && styles.ringSelected]}
       >
         <View style={styles.innerCircle}>

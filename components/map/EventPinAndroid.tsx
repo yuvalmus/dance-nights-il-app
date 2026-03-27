@@ -16,8 +16,7 @@ type Props = {
 };
 
 export function EventPinAndroid({ name, logo, themeColors, isSelected }: Props) {
-  const colors = isSelected ? [Colors.primary, Colors.primary] : themeColors;
-  const arrowColor = isSelected ? Colors.primary : themeColors[themeColors.length - 1];
+  const arrowColor = themeColors[themeColors.length - 1];
   const size = isSelected ? SELECTED_PIN_SIZE : PIN_SIZE;
   const innerSize = size - BORDER_WIDTH * 2;
   const containerWidth = size + 8;
@@ -30,9 +29,9 @@ export function EventPinAndroid({ name, logo, themeColors, isSelected }: Props) 
       alignItems: 'center',
     }}>
       <LinearGradient
-        colors={colors}
+        colors={themeColors}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0, y: 1 }}
         style={{
           width: size,
           height: size,
