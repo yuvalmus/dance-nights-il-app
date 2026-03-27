@@ -89,9 +89,6 @@ export default function TonightScreen() {
 
   return (
     <View style={styles.container}>
-      <EventMap
-        events={filteredEvents}
-        selectedEventId={selectedEventId}
         <EventMap
           ref={mapRef}
           events={filteredEvents}
