@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useVenue } from '@/hooks/useVenue';
 import { Colors } from '@/constants/colors';
 import { Ionicons } from '@/components/ui/Icon';
+import { updateEvent } from '@/lib/eventService';
 import EventForm, { EventFormValues } from '@/components/venue/EventForm';
 import type { Event, EventSchedule } from '@/types/database';
 import { formatTime } from '@/lib/date';
@@ -83,92 +84,7 @@ export default function EditEventScreen() {
 
     setLoading(true);
     try {
-      let posterUrl: string | null = values.posterUri;
-
-      // Handle poster change
-      if (values.posterChanged) {
-        // Delete old poster from storage if it exists
-        if (originalPosterUrl) {
-          const oldPath = originalPosterUrl.split('/posters/')[1];
-          if (oldPath) {
-            await supabase.storage.from('posters').remove([oldPath]);
-          }
-        }
-
-        // Upload new poster
-        if (values.posterUri) {
-          const ext = values.posterUri.split('.').pop()?.toLowerCase() || 'jpg';
-          const path = `${Date.now()}.${ext}`;
-
-          const formData = new FormData();
-          formData.append('file', {
-            uri: values.posterUri,
-            name: `poster.${ext}`,
-            type: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
-          } as any);
-
-          const { error: uploadError } = await supabase.storage
-            .from('posters')
-            .upload(path, formData, { contentType: 'multipart/form-data' });
-
-          if (uploadError) throw uploadError;
-
-          const { data: urlData } = supabase.storage
-            .from('posters')
-            .getPublicUrl(path);
-
-          posterUrl = urlData.publicUrl;
-        } else {
-          posterUrl = null;
-        }
-      }
-
-      // Update event
-      const { error: eventError } = await supabase
-        .from('events')
-        .update({
-          title: values.title,
-          description: values.description || null,
-          date: values.date,
-          dance_styles: values.dance_styles,
-          poster_url: posterUrl,
-          price: values.price ? parseInt(values.price, 10) : null,
-          price_note: values.price_note || null,
-          dj: values.dj || null,
-          instructors: values.instructors,
-          pre_register: values.pre_register,
-          registration_link: values.registration_link || null,
-          spots_total: values.spots_total ? parseInt(values.spots_total, 10) : null,
-          is_published: values.is_published,
-        })
-        .eq('id', eventId);
-
-      if (eventError) throw eventError;
-
-      // Replace schedules: delete old, insert new
-      const { error: deleteError } = await supabase
-        .from('event_schedules')
-        .delete()
-        .eq('event_id', eventId);
-
-      if (deleteError) throw deleteError;
-
-      if (values.schedules.length > 0) {
-        const schedules = values.schedules.map((s, i) => ({
-          event_id: eventId,
-          time: s.time,
-          description: s.description,
-          level: s.level || null,
-          sort_order: i,
-        }));
-
-        const { error: schedError } = await supabase
-          .from('event_schedules')
-          .insert(schedules);
-
-        if (schedError) throw schedError;
-      }
-
+      await updateEvent({ values, eventId, originalPosterUrl });
       await refetchEvents();
       router.back();
     } catch (err: any) {
