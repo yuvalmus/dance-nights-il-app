@@ -28,14 +28,23 @@ export function invalidate(key: string) {
   store.delete(key);
 }
 
+/** Drop all cache entries whose key starts with the given prefix. */
+export function invalidateByPrefix(prefix: string) {
+  for (const key of store.keys()) {
+    if (key.startsWith(prefix)) store.delete(key);
+  }
+}
+
 /** Wipe all cached data (call on sign-out). */
 export function clearCache() {
   store.clear();
 }
 
 export const TTL = {
-  EVENTS: 15 * 60 * 1000,  // 15 min
-  COURSES: 30 * 60 * 1000, // 30 min
-  POLL: 5 * 60 * 1000,     // 5 min
-  PROFILE: 10 * 60 * 1000, // 10 min
+  EVENTS: 15 * 60 * 1000,       // 15 min
+  COURSES: 30 * 60 * 1000,      // 30 min
+  POLL: 5 * 60 * 1000,          // 5 min
+  PROFILE: 10 * 60 * 1000,      // 10 min
+  VENUE: 30 * 60 * 1000,        // 30 min — venue ownership rarely changes
+  VENUE_EVENTS: 5 * 60 * 1000,  // 5 min — venue owner checks events often
 } as const;

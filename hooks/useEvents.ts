@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { EventWithVenue } from '@/types/database';
 import { getUserLocation } from '@/lib/location';
 import { cachedFetch, invalidate, TTL } from '@/lib/cache';
-import { isEventLive } from '@/lib/date';
 
 export function useEvents(date: string) {
   const [events, setEvents] = useState<EventWithVenue[]>([]);
@@ -36,7 +36,9 @@ export function useEvents(date: string) {
     }
   }, [cacheKey]);
 
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+  // Re-run on screen focus. If cache is valid, returns instantly from memory.
+  // If cache was invalidated (e.g. after an edit), fetches fresh data.
+  useFocusEffect(useCallback(() => { fetchEvents(); }, [fetchEvents]));
 
   const refetch = useCallback(() => {
     invalidate(cacheKey);

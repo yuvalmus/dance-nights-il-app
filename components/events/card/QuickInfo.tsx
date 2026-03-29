@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
+import { formatTime } from '@/lib/date';
 
 type Props = {
   event: EventWithVenue;
@@ -15,13 +16,13 @@ export function QuickInfo({ event }: Props) {
       {event.schedules?.[0] && (
         <View style={styles.item}>
           <Ionicons name="time-outline" size={iconSize} color={Colors.textSecondary} />
-          <Text style={styles.text}>{event.schedules[0].time}</Text>
+          <Text style={styles.text}>{formatTime(event.schedules[0].time)}</Text>
         </View>
       )}
       {event.price && (
         <View style={styles.item}>
           <Ionicons name="ticket-outline" size={iconSize} color={Colors.textSecondary} />
-          <Text style={styles.text}>{event.price}</Text>
+          <Text style={styles.text}>₪{event.price}</Text>
         </View>
       )}
       {event.dj && (

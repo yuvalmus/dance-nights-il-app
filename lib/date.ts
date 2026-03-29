@@ -17,6 +17,12 @@ export function formatDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/** Format a time string (e.g. "20:00:00") as HH:mm, dropping seconds. */
+export function formatTime(time: string): string {
+  const [hours, minutes] = time.split(':');
+  return `${hours}:${minutes}`;
+}
+
 /** Get today's date key (plain local date, no shifting). */
 export function getTodayKey(): string {
   return formatDateKey(new Date());

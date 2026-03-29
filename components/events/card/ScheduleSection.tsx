@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
+import { formatTime } from '@/lib/date';
 
 type Schedule = {
   time: string;
@@ -25,7 +26,7 @@ export function ScheduleSection({ schedules, accentColor }: Props) {
           key={i}
           style={[styles.row, i < schedules.length - 1 && styles.rowBorder]}
         >
-          <Text style={[styles.time, { color: accentColor }]}>{schedule.time}</Text>
+          <Text style={[styles.time, { color: accentColor }]}>{formatTime(schedule.time)}</Text>
           <Text style={styles.desc}>{schedule.description}</Text>
         </View>
       ))}

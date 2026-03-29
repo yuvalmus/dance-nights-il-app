@@ -42,6 +42,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-router",
     "expo-location",
     "expo-secure-store",
+    "expo-web-browser",
+    "@react-native-community/datetimepicker",
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Noche needs access to your photos to upload event posters.",
+      },
+    ],
     [
       "expo-notifications",
       {

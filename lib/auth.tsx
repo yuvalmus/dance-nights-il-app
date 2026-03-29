@@ -2,6 +2,10 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { clearCache } from './cache';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
+
+WebBrowser.maybeCompleteAuthSession();
 
 type AuthContextType = {
   session: Session | null;
@@ -24,11 +28,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    const init = async () => {
+      // Check for existing session first
+      const { data: { session: existing } } = await supabase.auth.getSession();
+
+      if (existing) {
+        setSession(existing);
+        setLoading(false);
+        return;
+      }
+
+      // In dev builds, auto-sign-in with email/password dev user
+      if (__DEV__ && process.env.DEV_AUTH_EMAIL && process.env.DEV_AUTH_PASSWORD) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: process.env.DEV_AUTH_EMAIL,
+          password: process.env.DEV_AUTH_PASSWORD,
+        });
+        if (error) console.warn('Dev auto-login failed:', error.message);
+      }
+
       setLoading(false);
-    });
+    };
+
+    init();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -41,10 +63,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const redirectUrl = makeRedirectUri();
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+        skipBrowserRedirect: true,
+      },
     });
+
     if (error) throw error;
+    if (!data.url) throw new Error('No OAuth URL returned');
+
+    const result = await WebBrowser.openAuthSessionAsync(
+      data.url,
+      redirectUrl,
+    );
+
+    if (result.type === 'success') {
+      const url = result.url;
+      const params = new URLSearchParams(url.split('#')[1]);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+      }
+    }
   };
 
   const signOut = async () => {

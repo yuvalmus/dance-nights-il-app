@@ -35,6 +35,15 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['venues']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'venues_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       events: {
         Row: {
@@ -45,7 +54,7 @@ export interface Database {
           description: string | null;
           dance_styles: string[];
           poster_url: string | null;
-          price: string | null;
+          price: number | null;
           price_note: string | null;
           dj: string | null;
           instructors: string[];
@@ -65,6 +74,22 @@ export interface Database {
           spots_taken?: number;
         };
         Update: Partial<Database['public']['Tables']['events']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'events_venue_id_fkey';
+            columns: ['venue_id'];
+            isOneToOne: false;
+            referencedRelation: 'venues';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'events_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       event_schedules: {
         Row: {
@@ -80,6 +105,15 @@ export interface Database {
           sort_order?: number;
         };
         Update: Partial<Database['public']['Tables']['event_schedules']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'event_schedules_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       profiles: {
         Row: {
@@ -101,6 +135,15 @@ export interface Database {
           expo_push_token?: string | null;
         };
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_id_fkey';
+            columns: ['id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       polls: {
         Row: {
@@ -115,6 +158,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['polls']['Insert']>;
+        Relationships: [];
       };
       poll_options: {
         Row: {
@@ -129,6 +173,22 @@ export interface Database {
           sort_order?: number;
         };
         Update: Partial<Database['public']['Tables']['poll_options']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'poll_options_poll_id_fkey';
+            columns: ['poll_id'];
+            isOneToOne: false;
+            referencedRelation: 'polls';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'poll_options_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       poll_votes: {
         Row: {
@@ -143,6 +203,29 @@ export interface Database {
           voted_at?: string;
         };
         Update: Partial<Database['public']['Tables']['poll_votes']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'poll_votes_poll_id_fkey';
+            columns: ['poll_id'];
+            isOneToOne: false;
+            referencedRelation: 'polls';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'poll_votes_option_id_fkey';
+            columns: ['option_id'];
+            isOneToOne: false;
+            referencedRelation: 'poll_options';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'poll_votes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       courses: {
         Row: {
@@ -173,8 +256,25 @@ export interface Database {
           spots_taken?: number;
         };
         Update: Partial<Database['public']['Tables']['courses']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'courses_venue_id_fkey';
+            columns: ['venue_id'];
+            isOneToOne: false;
+            referencedRelation: 'venues';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'courses_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
+    Views: Record<string, never>;
     Functions: {
       get_events_by_date_and_distance: {
         Args: {
@@ -185,6 +285,8 @@ export interface Database {
         Returns: EventWithVenue[];
       };
     };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 
@@ -206,7 +308,7 @@ export type EventWithVenue = {
   description: string | null;
   dance_styles: string[];
   poster_url: string | null;
-  price: string | null;
+  price: number | null;
   price_note: string | null;
   dj: string | null;
   pre_register: boolean;
