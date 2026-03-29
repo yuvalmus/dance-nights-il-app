@@ -6,10 +6,13 @@ import { Colors } from '@/constants/colors';
 import { useAuth } from '@/lib/auth';
 import { useProfile } from '@/hooks/useProfile';
 import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS } from '@/constants/config';
+import { useVenue } from '@/hooks/useVenue';
+import MyVenueSection from '@/components/venue/MyVenueSection';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const { venue, venueEvents, toggleEventPublish, deleteEvent } = useVenue();
   const router = useRouter();
 
   if (!user) {
@@ -60,6 +63,16 @@ export default function ProfileScreen() {
             <Text style={styles.userEmail}>{user.email}</Text>
           </View>
         </View>
+
+        {/* Venue owner section */}
+        {venue && (
+          <MyVenueSection
+            venue={venue}
+            events={venueEvents}
+            onTogglePublish={toggleEventPublish}
+            onDelete={deleteEvent}
+          />
+        )}
 
         {/* Dance level */}
         <Text style={styles.sectionTitle}>רמת ריקוד</Text>
