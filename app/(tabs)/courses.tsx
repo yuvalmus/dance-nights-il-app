@@ -8,33 +8,31 @@ import PillSelect from '@/components/ui/PillSelect';
 import { CourseType } from '@/constants/config';
 
 const TAB_ITEMS = [
-  { value: 'all', label: 'הכל' },
   { value: 'course', label: 'קורסים' },
   { value: 'bootcamp', label: 'בוטקמפ' },
   { value: 'festival', label: 'פסטיבלים' },
 ];
 
 export default function CoursesScreen() {
-  const [selectedTab, setSelectedTab] = useState<CourseType | null>(null);
+  const [selectedTab, setSelectedTab] = useState<CourseType>('course');
   const { courses, loading } = useCourses(selectedTab);
 
   const handleTabToggle = (value: string) => {
-    setSelectedTab(value === 'all' || value === '' ? null : value as CourseType);
+    if (value) setSelectedTab(value as CourseType);
   };
-
-  const selectedPill = selectedTab ?? 'all';
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>קורסים ופסטיבלים</Text>
+      <Text style={styles.title}>העשרה ופסטיבלים</Text>
 
       {/* Filter tabs */}
       <View style={styles.tabs}>
         <PillSelect
           items={TAB_ITEMS}
-          selected={[selectedPill]}
+          selected={[selectedTab]}
           onToggle={handleTabToggle}
           mode="single"
+          allowEmpty={false}
         />
       </View>
 
