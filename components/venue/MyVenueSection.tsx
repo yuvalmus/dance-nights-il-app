@@ -23,8 +23,8 @@ export default function MyVenueSection({
   const router = useRouter();
 
   const today = new Date().toISOString().split('T')[0];
-  const upcomingEvents = events.filter((e) => e.date >= today);
-  const pastEvents = events.filter((e) => e.date < today);
+  const upcomingEvents = events.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const pastEvents = events.filter((e) => e.date < today).sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <View style={styles.container}>

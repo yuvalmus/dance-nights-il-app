@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { EventWithSchedules } from '@/hooks/useVenue';
+import { formatTime } from '@/lib/date';
 
 type VenueEventRowProps = {
   event: EventWithSchedules;
@@ -24,6 +25,29 @@ export default function VenueEventRow({ event, onTogglePublish, onDelete }: Venu
 
   const handleEdit = () => {
     router.push({ pathname: '/venue/edit-event', params: { eventId: event.id } });
+  };
+
+  const handleDuplicate = () => {
+    const duplicateData = JSON.stringify({
+      title: event.title,
+      description: event.description || '',
+      dance_styles: event.dance_styles,
+      schedules: event.event_schedules
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((s) => ({
+          time: formatTime(s.time),
+          description: s.description,
+          level: s.level || '',
+        })),
+      price: event.price != null ? String(event.price) : '',
+      price_note: event.price_note || '',
+      dj: event.dj || '',
+      instructors: event.instructors,
+      spots_total: event.spots_total ? String(event.spots_total) : '',
+      is_published: false,
+    });
+
+    router.push({ pathname: '/venue/add-event', params: { duplicate: duplicateData } });
   };
 
   const handleDelete = () => {
@@ -69,6 +93,9 @@ export default function VenueEventRow({ event, onTogglePublish, onDelete }: Venu
       <View style={styles.actions}>
         <TouchableOpacity onPress={handleEdit} hitSlop={8} style={styles.actionBtn}>
           <Ionicons name="pencil" size={16} color={Colors.textSecondary} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleDuplicate} hitSlop={8} style={styles.actionBtn}>
+          <Ionicons name="copy-outline" size={16} color={Colors.textSecondary} />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleTogglePublish} hitSlop={8} style={styles.actionBtn}>
           <Ionicons
