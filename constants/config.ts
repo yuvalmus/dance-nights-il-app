@@ -29,5 +29,9 @@ export const DANCE_LEVEL_LABELS: Record<DanceLevel, string> = {
   master: 'מאסטר',
 };
 
+// Course types
+export const COURSE_TYPES = ['course', 'bootcamp', 'festival'] as const;
+export type CourseType = (typeof COURSE_TYPES)[number];
+
 // Date ribbon: how many days ahead to show
 export const DATE_RIBBON_DAYS = 7;

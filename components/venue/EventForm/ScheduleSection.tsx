@@ -117,7 +117,8 @@ export default function ScheduleSection({ schedules, initialExpanded, onAdd, onU
                     label: DANCE_LEVEL_LABELS[l],
                   }))}
                   selected={entry.level ? [entry.level] : []}
-                  onToggle={(v) => onUpdate(index, 'level', entry.level === v ? '' : v)}
+                  onToggle={(v) => onUpdate(index, 'level', v)}
+                  mode="single"
                 />
               </View>
             </View>

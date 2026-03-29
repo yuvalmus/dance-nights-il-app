@@ -5,9 +5,10 @@ import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/lib/auth';
 import { useProfile } from '@/hooks/useProfile';
-import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS } from '@/constants/config';
+import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS, DanceLevel } from '@/constants/config';
 import { useVenue } from '@/hooks/useVenue';
 import MyVenueSection from '@/components/venue/MyVenueSection';
+import PillSelect from '@/components/ui/PillSelect';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -44,8 +45,8 @@ export default function ProfileScreen() {
     await updateProfile({ dance_styles: updated });
   };
 
-  const selectLevel = async (level: 'beginner' | 'intermediate' | 'master') => {
-    await updateProfile({ dance_level: level });
+  const handleLevelToggle = async (value: string) => {
+    await updateProfile({ dance_level: value as DanceLevel });
   };
 
   return (
@@ -77,49 +78,23 @@ export default function ProfileScreen() {
         {/* Dance level */}
         <Text style={styles.sectionTitle}>רמת ריקוד</Text>
         <View style={styles.pillRow}>
-          {DANCE_LEVELS.map((level) => (
-            <TouchableOpacity
-              key={level}
-              style={[
-                styles.pill,
-                profile?.dance_level === level && styles.pillActive,
-              ]}
-              onPress={() => selectLevel(level)}
-            >
-              <Text
-                style={[
-                  styles.pillText,
-                  profile?.dance_level === level && styles.pillTextActive,
-                ]}
-              >
-                {DANCE_LEVEL_LABELS[level]}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          <PillSelect
+            items={DANCE_LEVELS.map((l) => ({ value: l, label: DANCE_LEVEL_LABELS[l] }))}
+            selected={profile?.dance_level ? [profile.dance_level] : []}
+            onToggle={handleLevelToggle}
+            mode="single"
+            allowEmpty={false}
+          />
         </View>
 
         {/* Dance styles */}
         <Text style={styles.sectionTitle}>סגנונות ריקוד</Text>
         <View style={styles.pillRow}>
-          {DANCE_STYLES.map((danceStyle) => (
-            <TouchableOpacity
-              key={danceStyle}
-              style={[
-                styles.pill,
-                profile?.dance_styles?.includes(danceStyle) && styles.pillActive,
-              ]}
-              onPress={() => toggleDanceStyle(danceStyle)}
-            >
-              <Text
-                style={[
-                  styles.pillText,
-                  profile?.dance_styles?.includes(danceStyle) && styles.pillTextActive,
-                ]}
-              >
-                {DANCE_STYLE_LABELS[danceStyle]}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          <PillSelect
+            items={DANCE_STYLES.map((s) => ({ value: s, label: DANCE_STYLE_LABELS[s] }))}
+            selected={profile?.dance_styles || []}
+            onToggle={toggleDanceStyle}
+          />
         </View>
 
         {/* Sign out */}
@@ -179,31 +154,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   pillRow: {
-    flexDirection: 'row-reverse',
-    flexWrap: 'wrap',
-    gap: 8,
     marginBottom: 24,
-  },
-  pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  pillActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  pillText: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  pillTextActive: {
-    color: Colors.background,
-    fontWeight: '700',
   },
   loginPrompt: {
     flex: 1,

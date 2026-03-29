@@ -1,3 +1,5 @@
+import { DanceLevel, CourseType } from '@/constants/config';
+
 export type Json =
   | string
   | number
@@ -119,7 +121,7 @@ export interface Database {
         Row: {
           id: string;
           display_name: string | null;
-          dance_level: 'beginner' | 'intermediate' | 'master';
+          dance_level: DanceLevel;
           dance_styles: string[];
           favorite_venues: string[];
           expo_push_token: string | null;
@@ -129,7 +131,7 @@ export interface Database {
         Insert: {
           id: string;
           display_name?: string | null;
-          dance_level?: 'beginner' | 'intermediate' | 'master';
+          dance_level?: DanceLevel;
           dance_styles?: string[];
           favorite_venues?: string[];
           expo_push_token?: string | null;
@@ -233,7 +235,7 @@ export interface Database {
           venue_id: string | null;
           title: string;
           description: string | null;
-          type: 'course' | 'bootcamp' | 'festival';
+          type: CourseType;
           dance_styles: string[];
           level: string | null;
           instructor: string | null;

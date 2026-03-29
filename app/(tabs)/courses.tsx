@@ -1,22 +1,28 @@
 import { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/colors';
 import { useCourses } from '@/hooks/useCourses';
 import { CourseCard } from '@/components/courses/CourseCard';
+import PillSelect from '@/components/ui/PillSelect';
+import { CourseType } from '@/constants/config';
 
-type TabType = 'course' | 'bootcamp' | 'festival' | null;
-
-const TABS: { key: TabType; label: string }[] = [
-  { key: null, label: 'הכל' },
-  { key: 'course', label: 'קורסים' },
-  { key: 'bootcamp', label: 'בוטקמפ' },
-  { key: 'festival', label: 'פסטיבלים' },
+const TAB_ITEMS = [
+  { value: 'all', label: 'הכל' },
+  { value: 'course', label: 'קורסים' },
+  { value: 'bootcamp', label: 'בוטקמפ' },
+  { value: 'festival', label: 'פסטיבלים' },
 ];
 
 export default function CoursesScreen() {
-  const [selectedTab, setSelectedTab] = useState<TabType>(null);
+  const [selectedTab, setSelectedTab] = useState<CourseType | null>(null);
   const { courses, loading } = useCourses(selectedTab);
+
+  const handleTabToggle = (value: string) => {
+    setSelectedTab(value === 'all' || value === '' ? null : value as CourseType);
+  };
+
+  const selectedPill = selectedTab ?? 'all';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,25 +30,12 @@ export default function CoursesScreen() {
 
       {/* Filter tabs */}
       <View style={styles.tabs}>
-        {TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab.key ?? 'all'}
-            style={[
-              styles.tab,
-              selectedTab === tab.key && styles.tabActive,
-            ]}
-            onPress={() => setSelectedTab(tab.key)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === tab.key && styles.tabTextActive,
-              ]}
-            >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        <PillSelect
+          items={TAB_ITEMS}
+          selected={[selectedPill]}
+          onToggle={handleTabToggle}
+          mode="single"
+        />
       </View>
 
       {loading ? (
@@ -82,31 +75,8 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   tabs: {
-    flexDirection: 'row-reverse',
     paddingHorizontal: 16,
-    gap: 8,
     marginBottom: 16,
-  },
-  tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  tabActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  tabText: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  tabTextActive: {
-    color: Colors.background,
-    fontWeight: '700',
   },
   list: {
     paddingHorizontal: 16,

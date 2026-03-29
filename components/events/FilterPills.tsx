@@ -1,8 +1,15 @@
 import { View, ScrollView, StyleSheet } from "react-native";
 import { Colors } from "@/constants/colors";
 import { DANCE_STYLES, DANCE_STYLE_LABELS } from "@/constants/config";
-import { DanceStylePill } from "./DanceStylePill";
+import PillSelect from "@/components/ui/PillSelect";
 import { LiveToggle } from "./LiveToggle";
+
+const ALL_VALUE = 'all';
+
+const PILL_ITEMS = [
+  { value: ALL_VALUE, label: 'הכל' },
+  ...DANCE_STYLES.map((s) => ({ value: s, label: DANCE_STYLE_LABELS[s] })),
+];
 
 type Props = {
   selectedDanceStyle: string | null;
@@ -19,6 +26,12 @@ export function FilterPills({
   onLiveToggle,
   liveDisabled,
 }: Props) {
+  const handleToggle = (value: string) => {
+    onDanceStyleSelect(value === ALL_VALUE || value === '' ? null : value);
+  };
+
+  const selected = selectedDanceStyle ?? ALL_VALUE;
+
   return (
     <View style={styles.row}>
       <ScrollView
@@ -27,20 +40,14 @@ export function FilterPills({
         contentContainerStyle={styles.pillsContent}
         style={styles.pillsScroll}
       >
-        <DanceStylePill
-          label="הכל"
-          active={!selectedDanceStyle}
-          onPress={() => onDanceStyleSelect(null)}
+        <PillSelect
+          items={PILL_ITEMS}
+          selected={[selected]}
+          onToggle={handleToggle}
+          mode="single"
+          size="small"
+          allowEmpty={false}
         />
-
-        {DANCE_STYLES.map((danceStyle) => (
-          <DanceStylePill
-            key={danceStyle}
-            label={DANCE_STYLE_LABELS[danceStyle]}
-            active={selectedDanceStyle === danceStyle}
-            onPress={() => onDanceStyleSelect(selectedDanceStyle === danceStyle ? null : danceStyle)}
-          />
-        ))}
       </ScrollView>
 
       <View style={styles.divider} />
