@@ -5,8 +5,7 @@ import { Colors } from '@/constants/colors';
 import { useCourses } from '@/hooks/useCourses';
 import { CourseCard } from '@/components/courses/CourseCard';
 import PillSelect from '@/components/ui/PillSelect';
-
-type TabType = 'course' | 'bootcamp' | 'festival' | null;
+import { CourseType } from '@/constants/config';
 
 const TAB_ITEMS = [
   { value: 'all', label: 'הכל' },
@@ -16,11 +15,11 @@ const TAB_ITEMS = [
 ];
 
 export default function CoursesScreen() {
-  const [selectedTab, setSelectedTab] = useState<TabType>(null);
+  const [selectedTab, setSelectedTab] = useState<CourseType | null>(null);
   const { courses, loading } = useCourses(selectedTab);
 
   const handleTabToggle = (value: string) => {
-    setSelectedTab(value === 'all' || value === '' ? null : value as TabType);
+    setSelectedTab(value === 'all' || value === '' ? null : value as CourseType);
   };
 
   const selectedPill = selectedTab ?? 'all';

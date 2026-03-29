@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Course } from '@/types/database';
+import { CourseType } from '@/constants/config';
 import { cachedFetch, invalidate, TTL } from '@/lib/cache';
 
-type CourseType = 'course' | 'bootcamp' | 'festival' | null;
-
-export function useCourses(typeFilter: CourseType = null) {
+export function useCourses(typeFilter: CourseType | null = null) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -5,7 +5,7 @@ import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/lib/auth';
 import { useProfile } from '@/hooks/useProfile';
-import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS } from '@/constants/config';
+import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS, DanceLevel } from '@/constants/config';
 import { useVenue } from '@/hooks/useVenue';
 import MyVenueSection from '@/components/venue/MyVenueSection';
 import PillSelect from '@/components/ui/PillSelect';
@@ -46,7 +46,7 @@ export default function ProfileScreen() {
   };
 
   const handleLevelToggle = async (value: string) => {
-    await updateProfile({ dance_level: value as 'beginner' | 'intermediate' | 'master' });
+    await updateProfile({ dance_level: value as DanceLevel });
   };
 
   return (
