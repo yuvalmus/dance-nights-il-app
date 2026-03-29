@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Venue, Event, EventSchedule } from '@/types/database';
 import { useAuth } from '@/lib/auth';
@@ -63,9 +64,7 @@ export function useVenue() {
     }
   }, [user, venueCacheKey]);
 
-  useEffect(() => {
-    fetchVenue();
-  }, [fetchVenue]);
+  useFocusEffect(useCallback(() => { fetchVenue(); }, [fetchVenue]));
 
   const refetchEvents = useCallback(async () => {
     if (!venue) return;

@@ -1,4 +1,5 @@
-import { View, Text, Switch, StyleSheet } from 'react-native';
+import { useRef, useCallback } from 'react';
+import { View, Text, Switch, Pressable, Animated, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 
 type FormToggleProps = {
@@ -9,19 +10,40 @@ type FormToggleProps = {
 };
 
 export default function FormToggle({ label, description, value, onValueChange }: FormToggleProps) {
+  const flashAnim = useRef(new Animated.Value(0)).current;
+
+  const handlePress = useCallback(() => {
+    onValueChange(!value);
+    flashAnim.setValue(1);
+    Animated.timing(flashAnim, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
+  }, [value, onValueChange, flashAnim]);
+
+  const borderColor = flashAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Colors.border, Colors.primary],
+  });
+
   return (
-    <View style={styles.container}>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: Colors.border, true: Colors.primary }}
-        thumbColor={Colors.text}
-      />
-      <View style={styles.textContainer}>
-        <Text style={styles.label}>{label}</Text>
-        {description && <Text style={styles.description}>{description}</Text>}
-      </View>
-    </View>
+    <Pressable onPress={handlePress}>
+      <Animated.View style={[styles.container, { borderColor }]}>
+        <Switch
+          value={value}
+          onValueChange={onValueChange}
+          trackColor={{ false: Colors.border, true: Colors.primary }}
+          thumbColor={Colors.text}
+          style={{ transform: [{ scaleX: -1 }] }}
+          pointerEvents="none"
+        />
+        <View style={styles.textContainer}>
+          <Text style={styles.label}>{label}</Text>
+          {description && <Text style={styles.description}>{description}</Text>}
+        </View>
+      </Animated.View>
+    </Pressable>
   );
 }
 

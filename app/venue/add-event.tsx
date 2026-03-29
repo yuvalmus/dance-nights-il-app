@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Alert } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
@@ -12,6 +12,16 @@ export default function AddEventScreen() {
   const { venue, refetchEvents } = useVenue();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { duplicate } = useLocalSearchParams<{ duplicate?: string }>();
+
+  const initialValues = useMemo(() => {
+    if (!duplicate) return undefined;
+    try {
+      return JSON.parse(duplicate) as Partial<EventFormValues>;
+    } catch {
+      return undefined;
+    }
+  }, [duplicate]);
 
   const pickImage = async (): Promise<string | null> => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -109,8 +119,9 @@ export default function AddEventScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'אירוע חדש' }} />
+      <Stack.Screen options={{ title: initialValues ? 'שכפול אירוע' : 'אירוע חדש' }} />
       <EventForm
+        initialValues={initialValues}
         onSubmit={handleSubmit}
         onPickImage={pickImage}
         submitLabel="הוסף אירוע"
