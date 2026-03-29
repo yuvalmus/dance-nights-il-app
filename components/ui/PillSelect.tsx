@@ -11,9 +11,36 @@ type PillSelectProps = {
   items: PillItem[];
   selected: string[];
   onToggle: (value: string) => void;
+  mode?: 'multi' | 'single';
+  size?: 'default' | 'small';
+  allowEmpty?: boolean;
 };
 
-export default function PillSelect({ items, selected, onToggle }: PillSelectProps) {
+export default function PillSelect({
+  items,
+  selected,
+  onToggle,
+  mode = 'multi',
+  size = 'default',
+  allowEmpty = true,
+}: PillSelectProps) {
+  const isSmall = size === 'small';
+
+  const handlePress = (value: string) => {
+    const isSelected = selected.includes(value);
+
+    if (isSelected && !allowEmpty) {
+      if (mode === 'single') return;
+      if (mode === 'multi' && selected.length <= 1) return;
+    }
+
+    if (mode === 'single') {
+      onToggle(isSelected ? '' : value);
+    } else {
+      onToggle(value);
+    }
+  };
+
   return (
     <View style={styles.row}>
       {items.map((item) => {
@@ -25,12 +52,17 @@ export default function PillSelect({ items, selected, onToggle }: PillSelectProp
             key={item.value}
             style={[
               styles.pill,
+              isSmall && styles.pillSmall,
               isActive && { backgroundColor: activeBg, borderColor: activeBg },
             ]}
-            onPress={() => onToggle(item.value)}
+            onPress={() => handlePress(item.value)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
+            <Text style={[
+              styles.pillText,
+              isSmall && styles.pillTextSmall,
+              isActive && styles.pillTextActive,
+            ]}>
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -54,10 +86,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  pillSmall: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
   pillText: {
     color: Colors.textSecondary,
     fontSize: 14,
     fontWeight: '500',
+  },
+  pillTextSmall: {
+    fontSize: 13,
   },
   pillTextActive: {
     color: Colors.background,
