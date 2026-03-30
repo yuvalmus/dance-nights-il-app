@@ -64,6 +64,15 @@ async function upsertSchedules(eventId: string, schedules: EventFormValues['sche
   if (error) throw error;
 }
 
+function buildRegistrationLinks(formLinks: EventFormValues['registration_links']) {
+  return formLinks.map((link) => ({
+    label: link.label,
+    url: link.url,
+    spots_total: link.spots_total ? parseInt(link.spots_total, 10) : null,
+    spots_taken: link.spots_taken ? parseInt(link.spots_taken, 10) : 0,
+  }));
+}
+
 function buildEventRow(values: EventFormValues, posterUrl: string | null) {
   return {
     title: values.title,
@@ -76,8 +85,7 @@ function buildEventRow(values: EventFormValues, posterUrl: string | null) {
     dj: values.dj || null,
     instructors: values.instructors,
     pre_register: values.pre_register,
-    registration_link: values.registration_link || null,
-    spots_total: values.spots_total ? parseInt(values.spots_total, 10) : null,
+    registration_links: buildRegistrationLinks(values.registration_links),
     is_published: values.is_published,
   };
 }

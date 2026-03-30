@@ -1,19 +1,19 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
 import { ScheduleSection } from './ScheduleSection';
 import { InstructorPills } from './InstructorPills';
 import { AddressBox } from './AddressBox';
+import RegistrationLinks from './RegistrationLinks';
 
 type Props = {
   event: EventWithVenue;
   accentColor: string;
   hasCoordinates: boolean;
   onNavigate: () => void;
-  onRegister: () => void;
 };
 
-export function CardDetails({ event, accentColor, hasCoordinates, onNavigate, onRegister }: Props) {
+export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: Props) {
   return (
     <View style={styles.container}>
       {event.description && (
@@ -28,8 +28,6 @@ export function CardDetails({ event, accentColor, hasCoordinates, onNavigate, on
         <InstructorPills instructors={event.instructors} accentColor={accentColor} />
       )}
 
-      {event.price_note && <Text style={styles.priceNote}>{event.price_note}</Text>}
-
       {(event.address || event.city || hasCoordinates) && (
         <AddressBox
           address={event.address}
@@ -40,18 +38,13 @@ export function CardDetails({ event, accentColor, hasCoordinates, onNavigate, on
         />
       )}
 
-      {event.pre_register ? (
-        <TouchableOpacity
-          style={[styles.cta, { backgroundColor: accentColor }]}
-          onPress={onRegister}
-        >
-          <Text style={styles.ctaText}>הרשמה ←</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.cta}>
-          <Text style={styles.ctaFreeText}>כניסה חופשית ✓</Text>
-        </View>
-      )}
+      <RegistrationLinks
+        links={event.pre_register ? (event.registration_links || []) : []}
+        preRegister={event.pre_register}
+        price={event.price}
+        priceNote={event.price_note}
+        accentColor={accentColor}
+      />
     </View>
   );
 }
@@ -70,26 +63,5 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     lineHeight: 21,
     marginBottom: 12,
-  },
-  priceNote: {
-    color: Colors.textMuted,
-    fontSize: 12,
-    textAlign: 'right',
-    marginBottom: 10,
-  },
-  cta: {
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  ctaText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  ctaFreeText: {
-    color: Colors.success,
-    fontWeight: '700',
-    fontSize: 14,
   },
 });

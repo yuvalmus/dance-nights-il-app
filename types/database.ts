@@ -61,19 +61,16 @@ export interface Database {
           dj: string | null;
           instructors: string[];
           pre_register: boolean;
-          registration_link: string | null;
-          spots_total: number | null;
-          spots_taken: number;
+          registration_links: RegistrationLink[];
           is_published: boolean;
           created_by: string | null;
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['events']['Row'], 'id' | 'created_at' | 'updated_at' | 'spots_taken'> & {
+        Insert: Omit<Database['public']['Tables']['events']['Row'], 'id' | 'created_at' | 'updated_at'> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
-          spots_taken?: number;
         };
         Update: Partial<Database['public']['Tables']['events']['Insert']>;
         Relationships: [
@@ -314,9 +311,7 @@ export type EventWithVenue = {
   price_note: string | null;
   dj: string | null;
   pre_register: boolean;
-  registration_link: string | null;
-  spots_total: number | null;
-  spots_taken: number;
+  registration_links: RegistrationLink[];
   venue_name: string;
   venue_slug: string;
   address: string;
@@ -335,6 +330,13 @@ export type ScheduleEntry = {
   time: string;
   description: string;
   level: string | null;
+};
+
+export type RegistrationLink = {
+  label: string;
+  url: string;
+  spots_total: number | null;
+  spots_taken: number;
 };
 
 // Poll with nested options and vote counts

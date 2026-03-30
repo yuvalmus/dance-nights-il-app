@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
@@ -13,14 +12,12 @@ import FormInput from '@/components/ui/FormInput';
 import { EventFormValues } from './types';
 
 type Props = {
-  price: string;
-  price_note: string;
   dj: string;
   instructors: string[];
   onUpdate: <K extends keyof EventFormValues>(key: K, value: EventFormValues[K]) => void;
 };
 
-export default function DetailsSection({ price, price_note, dj, instructors, onUpdate }: Props) {
+export default function DetailsSection({ dj, instructors, onUpdate }: Props) {
   const [newInstructor, setNewInstructor] = useState('');
 
   const addInstructor = () => {
@@ -37,26 +34,6 @@ export default function DetailsSection({ price, price_note, dj, instructors, onU
 
   return (
     <FormSection title="פרטים נוספים">
-      <Text style={styles.fieldLabel}>מחיר</Text>
-      <View style={styles.priceRow}>
-        <Text style={styles.shekelPrefix}>₪</Text>
-        <TextInput
-          value={price}
-          onChangeText={(v) => onUpdate('price', v.replace(/[^0-9]/g, ''))}
-          placeholder="50"
-          placeholderTextColor={Colors.textMuted}
-          selectionColor={Colors.primary}
-          keyboardType="number-pad"
-          style={styles.priceTextInput}
-        />
-      </View>
-
-      <FormInput
-        label="הערת מחיר"
-        value={price_note}
-        onChangeText={(v) => onUpdate('price_note', v)}
-        placeholder="הנחה לסטודנטים"
-      />
       <FormInput
         label="DJ"
         value={dj}
@@ -103,31 +80,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'right',
     marginBottom: 8,
-  },
-  priceRow: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    width: '40%',
-    alignSelf: 'flex-end',
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 16,
-  },
-  shekelPrefix: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  priceTextInput: {
-    flex: 1,
-    color: Colors.text,
-    fontSize: 15,
-    textAlign: 'right',
-    paddingVertical: 16,
-    paddingHorizontal: 8,
   },
   instructorTags: {
     flexDirection: 'row-reverse',

@@ -43,7 +43,6 @@ export default function VenueEventRow({ event, onTogglePublish, onDelete }: Venu
       price_note: event.price_note || '',
       dj: event.dj || '',
       instructors: event.instructors,
-      spots_total: event.spots_total ? String(event.spots_total) : '',
       is_published: false,
     });
 
