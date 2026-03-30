@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 
 type PillItem = {
@@ -42,7 +42,11 @@ export default function PillSelect({
   };
 
   return (
-    <View style={styles.row}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.row}
+    >
       {items.map((item) => {
         const isActive = selected.includes(item.value);
         const activeBg = item.activeColor || Colors.primary;
@@ -68,14 +72,14 @@ export default function PillSelect({
           </TouchableOpacity>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row-reverse',
-    flexWrap: 'wrap',
+    flexGrow: 1,
     gap: 8,
   },
   pill: {

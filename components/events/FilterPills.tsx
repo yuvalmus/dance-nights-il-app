@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Colors } from "@/constants/colors";
 import { DANCE_STYLES, DANCE_STYLE_LABELS } from "@/constants/config";
 import PillSelect from "@/components/ui/PillSelect";
@@ -34,12 +34,7 @@ export function FilterPills({
 
   return (
     <View style={styles.row}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.pillsContent}
-        style={styles.pillsScroll}
-      >
+      <View style={styles.pillsContainer}>
         <PillSelect
           items={PILL_ITEMS}
           selected={[selected]}
@@ -48,7 +43,7 @@ export function FilterPills({
           size="small"
           allowEmpty={false}
         />
-      </ScrollView>
+      </View>
 
       <View style={styles.divider} />
       <LiveToggle active={liveFilter} disabled={liveDisabled} onPress={onLiveToggle} />
@@ -64,14 +59,8 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingBottom: 8,
   },
-  pillsScroll: {
+  pillsContainer: {
     flex: 1,
-  },
-  pillsContent: {
-    flexDirection: "row-reverse",
-    gap: 8,
-    flexGrow: 1,
-    justifyContent: "flex-start",
   },
   divider: {
     width: 1,
