@@ -4,6 +4,13 @@ export type ScheduleEntryForm = {
   level: string;
 };
 
+export type RegistrationLinkForm = {
+  label: string;
+  url: string;
+  spots_total: string;
+  spots_taken: string;
+};
+
 export type EventFormValues = {
   title: string;
   date: string;
@@ -16,8 +23,7 @@ export type EventFormValues = {
   dj: string;
   instructors: string[];
   pre_register: boolean;
-  registration_link: string;
-  spots_total: string;
+  registration_links: RegistrationLinkForm[];
   is_published: boolean;
   description: string;
 };
@@ -34,8 +40,7 @@ export const DEFAULT_VALUES: EventFormValues = {
   dj: '',
   instructors: [],
   pre_register: false,
-  registration_link: '',
-  spots_total: '',
+  registration_links: [],
   is_published: true,
   description: '',
 };

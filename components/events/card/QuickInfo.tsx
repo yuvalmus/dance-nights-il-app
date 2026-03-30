@@ -19,7 +19,7 @@ export function QuickInfo({ event }: Props) {
           <Text style={styles.text}>{formatTime(event.schedules[0].time)}</Text>
         </View>
       )}
-      {event.price && (
+      {event.price && !(event.pre_register && (event.registration_links?.length ?? 0) > 1) && (
         <View style={styles.item}>
           <Ionicons name="ticket-outline" size={iconSize} color={Colors.textSecondary} />
           <Text style={styles.text}>₪{event.price}</Text>

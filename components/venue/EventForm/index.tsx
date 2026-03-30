@@ -42,6 +42,9 @@ export default function EventForm({
     addScheduleEntry,
     updateScheduleEntry,
     removeScheduleEntry,
+    addRegistrationLink,
+    updateRegistrationLink,
+    removeRegistrationLink,
     handleSubmit,
   } = useEventForm(initialValues, onSubmit, onSubmitRef);
 
@@ -150,8 +153,6 @@ export default function EventForm({
 
       {/* Details */}
       <DetailsSection
-        price={form.price}
-        price_note={form.price_note}
         dj={form.dj}
         instructors={form.instructors}
         onUpdate={update}
@@ -159,10 +160,16 @@ export default function EventForm({
 
       {/* Registration */}
       <RegistrationSection
+        price={form.price}
+        price_note={form.price_note}
         pre_register={form.pre_register}
-        registration_link={form.registration_link}
-        spots_total={form.spots_total}
+        registration_links={form.registration_links}
+        errors={errors}
         onUpdate={update}
+        onTogglePreRegister={(v) => update('pre_register', v)}
+        onAddLink={addRegistrationLink}
+        onUpdateLink={updateRegistrationLink}
+        onRemoveLink={removeRegistrationLink}
       />
 
       {/* Visibility */}

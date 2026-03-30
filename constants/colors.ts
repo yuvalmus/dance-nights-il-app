@@ -23,6 +23,7 @@ export const Colors = {
 
   // UI
   border: '#2a2a4a',
+  brighterBorder: '#3c3c4c',
   overlay: 'rgba(0, 0, 0, 0.6)',
   shimmer: '#2a2a4a',
 

@@ -42,6 +42,13 @@ export default function EditEventScreen() {
       const event = data as EventWithSchedules;
       setOriginalPosterUrl(event.poster_url);
 
+      const links = (event.registration_links as any[] || []).map((l: any) => ({
+        label: l.label || '',
+        url: l.url || '',
+        spots_total: l.spots_total != null ? String(l.spots_total) : '',
+        spots_taken: l.spots_taken != null ? String(l.spots_taken) : '0',
+      }));
+
       setInitialValues({
         title: event.title,
         description: event.description || '',
@@ -61,8 +68,7 @@ export default function EditEventScreen() {
         dj: event.dj || '',
         instructors: event.instructors,
         pre_register: event.pre_register,
-        registration_link: event.registration_link || '',
-        spots_total: event.spots_total ? String(event.spots_total) : '',
+        registration_links: links,
         is_published: event.is_published,
       });
       setFetching(false);

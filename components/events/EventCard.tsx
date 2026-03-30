@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
-import { View, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/colors';
-import { EventWithVenue } from '@/types/database';
+import { EventWithVenue, RegistrationLink } from '@/types/database';
 import { DANCE_LEVEL_LABELS } from '@/constants/config';
 import { isEventLive } from '@/lib/date';
 import { openNavigation } from '@/lib/navigation';
@@ -17,6 +17,14 @@ type Props = {
   isExpanded: boolean;
   onPress: () => void;
 };
+
+function getAccumulatedSpots(links: RegistrationLink[]) {
+  const withSpots = links.filter((l) => l.spots_total != null && l.spots_total > 0);
+  if (withSpots.length === 0) return null;
+  const total = withSpots.reduce((sum, l) => sum + l.spots_total!, 0);
+  const taken = withSpots.reduce((sum, l) => sum + l.spots_taken, 0);
+  return { total, taken };
+}
 
 export function EventCard({ event, isExpanded, onPress }: Props) {
   const [posterFullscreen, setPosterFullscreen] = useState(false);
@@ -39,23 +47,24 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
     );
   }, [event.schedules]);
 
+  const accumulated = useMemo(
+    () => getAccumulatedSpots(event.registration_links || []),
+    [event.registration_links],
+  );
+
   const handleNavigate = useCallback(() => {
     openNavigation(event.venue_lat, event.venue_lng, event.venue_name);
   }, [event.venue_lat, event.venue_lng, event.venue_name]);
 
-  const handleRegister = useCallback(() => {
-    if (event.registration_link) Linking.openURL(event.registration_link);
-  }, [event.registration_link]);
-
   return (
     <>
-      <TouchableOpacity
-        style={[
+      <Pressable
+        style={({ pressed }) => [
           styles.card,
           isExpanded && { borderColor: accentColor, borderWidth: 1 },
+          pressed && { opacity: 0.85 },
         ]}
         onPress={onPress}
-        activeOpacity={0.85}
       >
         {/* Gradient left accent strip */}
         <LinearGradient
@@ -80,8 +89,8 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
           isLive={live}
         />
 
-        {event.pre_register && event.spots_total != null && event.spots_total > 0 && (
-          <SpotsBar total={event.spots_total} taken={event.spots_taken} />
+        {!isExpanded && event.pre_register && accumulated && (
+          <SpotsBar total={accumulated.total} taken={accumulated.taken} />
         )}
 
         {isExpanded && (
@@ -90,10 +99,9 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
             accentColor={accentColor}
             hasCoordinates={hasCoordinates}
             onNavigate={handleNavigate}
-            onRegister={handleRegister}
           />
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {hasPoster && (
         <PosterModal
