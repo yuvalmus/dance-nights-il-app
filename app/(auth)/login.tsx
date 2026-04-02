@@ -1,9 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/lib/auth';
+
+const bailandoLogoSlogan = require('@/assets/Bailando-slogan.png');
+const BAILANDO_SLOGAN_WIDTH = 2200;
+const BAILANDO_SLOGAN_HEIGHT = 700;
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
@@ -12,7 +17,7 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      router.back();
+      router.replace('/(tabs)/profile');
     } catch (err) {
       console.error('Sign in error:', err);
     }
@@ -25,18 +30,17 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <Text style={styles.logo}>NOCHE</Text>
+        <Image
+          source={bailandoLogoSlogan}
+          style={styles.logo}
+          transition={200}
+        />
         <Text style={styles.subtitle}>גלה איפה רוקדים הלילה</Text>
 
         <View style={styles.buttons}>
           <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
             <Ionicons name="logo-google" size={22} color="#fff" />
             <Text style={styles.googleButtonText}>התחבר עם Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.appleButton}>
-            <Ionicons name="logo-apple" size={22} color="#fff" />
-            <Text style={styles.appleButtonText}>התחבר עם Apple</Text>
           </TouchableOpacity>
         </View>
 
@@ -56,7 +60,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 60,
+    top: 40,
     right: 20,
     zIndex: 10,
     padding: 8,
@@ -68,11 +72,8 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   logo: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    letterSpacing: 6,
-    marginBottom: 8,
+    width: '100%',
+    aspectRatio: BAILANDO_SLOGAN_WIDTH / BAILANDO_SLOGAN_HEIGHT,
   },
   subtitle: {
     fontSize: 16,
@@ -93,20 +94,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   googleButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  appleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    backgroundColor: '#333',
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  appleButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

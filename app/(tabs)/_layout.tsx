@@ -9,6 +9,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{ headerShown: false }}
       tabBar={(props) => <CurvedTabBar ref={tabBarRef} {...props} />}
     >

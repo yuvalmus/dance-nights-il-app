@@ -2,13 +2,13 @@ import { ExpoConfig, ConfigContext } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Noche",
-  slug: "noche-app",
+  name: "Bailando",
+  slug: "bailando-app",
   version: "0.0.1",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "dark",
-  scheme: "noche",
+  scheme: "bailando",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
@@ -16,24 +16,30 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
+    icon: {
+      light: "./assets/icon.png",
+      dark: "./assets/icon.png",
+      tinted: "./assets/monochrome-icon.png",
+    },
     supportsTablet: false,
-    bundleIdentifier: "com.noche.app",
+    bundleIdentifier: "com.bailando.app",
     infoPlist: {
       NSLocationWhenInUseUsageDescription:
-        "Noche uses your location to show nearby dance events and calculate distances.",
+        "Bailando uses your location to show nearby dance events and calculate distances.",
       LSApplicationQueriesSchemes: ["waze", "comgooglemaps"],
       ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
+      foregroundImage: "./assets/adaptive-foreground.png",
+      monochromeImage: "./assets/monochrome-icon.png",
       backgroundColor: "#1a1a2e",
     },
-    package: "com.noche.app",
+    package: "com.bailando.app",
     config: {
       googleMaps: {
-        apiKey: process.env.GOOGLE_MAPS_API_KEY ?? "",
+        apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
       },
     },
     permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
@@ -48,7 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-image-picker",
       {
         photosPermission:
-          "Noche needs access to your photos to upload event posters.",
+          "Bailando needs access to your photos to upload event posters.",
       },
     ],
     [
@@ -70,11 +76,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
   ],
   extra: {
+    supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+    supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     router: {
       origin: false,
     },
     eas: {
-      projectId: "5e989128-1c89-46bd-9643-c4bdad1c9bdf",
+      projectId: "f1617573-0faa-443e-8003-a3232d4c4b48",
     },
   },
   owner: "yuvalmus",
