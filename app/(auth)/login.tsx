@@ -17,7 +17,7 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      router.back();
+      router.replace('/(tabs)/profile');
     } catch (err) {
       console.error('Sign in error:', err);
     }
