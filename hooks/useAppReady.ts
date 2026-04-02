@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
+import { I18nManager } from "react-native";
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+
+// Force LTR at the system level. The app manually implements RTL layout
+// (row-reverse, textAlign: 'right') so it looks correct regardless of device language.
+I18nManager.allowRTL(false);
+I18nManager.forceRTL(false);
 
 // Fonts the app needs at runtime (used by components/ui/Icon.tsx).
 // In custom dev builds these are embedded natively via the expo-font
