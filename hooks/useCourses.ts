@@ -1,11 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Course } from '@/types/database';
+import { Course, CourseSchedule } from '@/types/database';
 import { CourseType } from '@/constants/config';
 import { cachedFetch, invalidate, TTL } from '@/lib/cache';
 
-export function useCourses(typeFilter: CourseType | null = null) {
-  const [courses, setCourses] = useState<Course[]>([]);
+export type CourseWithVenue = Course & {
+  venues: { name: string; city: string } | null;
+  course_schedules: Pick<CourseSchedule, 'day' | 'start_time' | 'end_time'>[];
+};
+
+export function useCourses(typeFilter: CourseType | null = null, searchQuery: string = '') {
+  const [courses, setCourses] = useState<CourseWithVenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,15 +24,15 @@ export function useCourses(typeFilter: CourseType | null = null) {
       const data = await cachedFetch(cacheKey, TTL.COURSES, async () => {
         let query = supabase
           .from('courses')
-          .select('*')
+          .select('*, venues(name, city), course_schedules(day, start_time, end_time)')
           .eq('is_published', true)
-          .order('start_date', { ascending: true });
+          .order('created_at', { ascending: false });
 
         if (typeFilter) query = query.eq('type', typeFilter);
 
         const { data, error: queryError } = await query;
         if (queryError) throw queryError;
-        return data ?? [];
+        return (data ?? []) as CourseWithVenue[];
       });
 
       setCourses(data);
@@ -41,10 +46,22 @@ export function useCourses(typeFilter: CourseType | null = null) {
 
   useEffect(() => { fetchCourses(); }, [fetchCourses]);
 
+  const filteredCourses = useMemo(() => {
+    if (!searchQuery.trim()) return courses;
+
+    const q = searchQuery.trim().toLowerCase();
+    return courses.filter((c) =>
+      c.title.toLowerCase().includes(q) ||
+      c.instructor?.toLowerCase().includes(q) ||
+      c.dance_style?.toLowerCase().includes(q) ||
+      c.venues?.name?.toLowerCase().includes(q)
+    );
+  }, [courses, searchQuery]);
+
   const refetch = useCallback(() => {
     invalidate(cacheKey);
     return fetchCourses();
   }, [cacheKey, fetchCourses]);
 
-  return { courses, loading, error, refetch };
+  return { courses: filteredCourses, allCount: courses.length, loading, error, refetch };
 }

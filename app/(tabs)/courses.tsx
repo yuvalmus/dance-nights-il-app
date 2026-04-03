@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/colors';
 import { useCourses } from '@/hooks/useCourses';
 import { CourseCard } from '@/components/courses/CourseCard';
+import { CourseResultsHeader } from '@/components/courses/CourseResultsHeader';
 import PillSelect from '@/components/ui/PillSelect';
+import SearchBar from '@/components/ui/SearchBar';
 import { CourseType } from '@/constants/config';
 
 const TAB_ITEMS = [
@@ -15,17 +17,35 @@ const TAB_ITEMS = [
 
 export default function CoursesScreen() {
   const [selectedTab, setSelectedTab] = useState<CourseType>('course');
-  const { courses, loading } = useCourses(selectedTab);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { courses, allCount, loading } = useCourses(selectedTab, searchQuery);
 
   const handleTabToggle = (value: string) => {
     if (value) setSelectedTab(value as CourseType);
+  };
+
+  const handleReset = useCallback(() => {
+    setSearchQuery('');
+    setSelectedTab('course');
+  }, []);
+
+  const handleFilterPress = () => {
+    // TODO: Open filter bottom sheet (next task)
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>העשרה ופסטיבלים</Text>
 
-      {/* Filter tabs */}
+      {/* Search bar */}
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="חיפוש קורס או סגנון..."
+        onFilterPress={handleFilterPress}
+      />
+
+      {/* Type filter pills */}
       <View style={styles.tabs}>
         <PillSelect
           items={TAB_ITEMS}
@@ -35,6 +55,11 @@ export default function CoursesScreen() {
           allowEmpty={false}
         />
       </View>
+
+      <View style={styles.divider} />
+
+      {/* Results header */}
+      <CourseResultsHeader totalResults={allCount} onReset={handleReset} />
 
       {loading ? (
         <ActivityIndicator
@@ -50,7 +75,7 @@ export default function CoursesScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={styles.empty}>אין קורסים להצגה</Text>
+            <Text style={styles.empty}>אין תוצאות להצגה</Text>
           }
         />
       )}
@@ -62,19 +87,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    padding: 5
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: Colors.text,
     textAlign: 'right',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
+    marginBottom: 20,
+    paddingHorizontal: 13,
   },
   tabs: {
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginTop: 12,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginHorizontal: 16,
+    marginTop: 22,
+    marginBottom: 12,
   },
   list: {
     paddingHorizontal: 16,

@@ -18,7 +18,7 @@ export type DanceLevel = (typeof DANCE_LEVELS)[number];
 
 // Hebrew labels
 export const DANCE_STYLE_LABELS: Record<DanceStyle, string> = {
-  bachata: 'בצאטה',
+  bachata: "בצ'אטה",
   salsa: 'סלסה',
   zouk: 'זוק',
 };

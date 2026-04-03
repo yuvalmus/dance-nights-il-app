@@ -233,13 +233,11 @@ export interface Database {
           title: string;
           description: string | null;
           type: CourseType;
-          dance_styles: string[];
+          dance_style: string | null;
           level: string | null;
           instructor: string | null;
-          schedule: string | null;
-          weeks: number | null;
-          start_date: string | null;
-          end_date: string | null;
+          instructor_id: string | null;
+          dates: string[];
           price: string | null;
           spots_total: number | null;
           spots_taken: number;
@@ -264,10 +262,39 @@ export interface Database {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'courses_instructor_id_fkey';
+            columns: ['instructor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'courses_created_by_fkey';
             columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      course_schedules: {
+        Row: {
+          id: string;
+          course_id: string;
+          day: string;
+          start_time: string;
+          end_time: string;
+        };
+        Insert: Omit<Database['public']['Tables']['course_schedules']['Row'], 'id'> & {
+          id?: string;
+        };
+        Update: Partial<Database['public']['Tables']['course_schedules']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'course_schedules_course_id_fkey';
+            columns: ['course_id'];
+            isOneToOne: false;
+            referencedRelation: 'courses';
             referencedColumns: ['id'];
           },
         ];
@@ -298,6 +325,7 @@ export type Poll = Database['public']['Tables']['polls']['Row'];
 export type PollOption = Database['public']['Tables']['poll_options']['Row'];
 export type PollVote = Database['public']['Tables']['poll_votes']['Row'];
 export type Course = Database['public']['Tables']['courses']['Row'];
+export type CourseSchedule = Database['public']['Tables']['course_schedules']['Row'];
 
 // The shape returned by the get_events_by_date_and_distance RPC
 export type EventWithVenue = {
