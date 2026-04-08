@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
-import { DANCE_LEVEL_LABELS } from '@/constants/config';
+import { DanceLevel } from '@/constants/config';
+import DanceLevelBadge from '@/components/ui/DanceLevelBadge';
 import { isNewCourse, formatCourseDateRange } from '@/lib/date';
 import { CoursePosterOverlay } from '@/components/courses/CoursePosterOverlay';
 import { CourseWithVenue } from '@/hooks/useCourses';
@@ -15,9 +16,7 @@ type Props = {
 export function CourseCard({ course, onPress }: Props) {
   const isNew = isNewCourse(course.created_at);
   const dates = formatCourseDateRange(course.dates);
-  const levelLabel = course.level
-    ? (DANCE_LEVEL_LABELS[course.level as keyof typeof DANCE_LEVEL_LABELS] ?? course.level)
-    : null;
+  const level = (course.level as DanceLevel) ?? null;
 
   const venueName = course.venues?.name ?? null;
   const venueCity = course.venues?.city ?? null;
@@ -43,11 +42,14 @@ export function CourseCard({ course, onPress }: Props) {
         </View>
       )}
 
+      {/* Accent divider */}
+      <View style={styles.accentDivider} />
+
       {/* Content */}
       <View style={styles.content}>
         {/* Level & Dates row */}
         <View style={styles.metaRow}>
-          {levelLabel && <Text style={styles.metaText}>{levelLabel}</Text>}
+          <DanceLevelBadge level={level} size="md" mode='full' />
           {dates && <Text style={styles.metaText}>{dates}</Text>}
         </View>
 
@@ -86,7 +88,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(212, 160, 23, 0.15)',
+    // Elevation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 6,
   },
   posterContainer: {
     width: '100%',
@@ -101,6 +109,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceLight,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  accentDivider: {
+    height: 1.5,
+    backgroundColor: 'rgba(212, 160, 23, 0.25)',
   },
   content: {
     padding: 16,

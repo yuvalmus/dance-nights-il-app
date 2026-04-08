@@ -1,37 +1,55 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { useCourses } from '@/hooks/useCourses';
 import { CourseCard } from '@/components/courses/CourseCard';
 import { CourseResultsHeader } from '@/components/courses/CourseResultsHeader';
-import PillSelect from '@/components/ui/PillSelect';
+import { CourseFiltersSheet, FiltersSheetRef } from '@/components/courses/CourseFiltersSheet';
 import SearchBar from '@/components/ui/SearchBar';
-import { CourseType } from '@/constants/config';
-
-const TAB_ITEMS = [
-  { value: 'course', label: 'קורסים' },
-  { value: 'bootcamp', label: 'בוטקמפ' },
-  { value: 'festival', label: 'פסטיבלים' },
-];
+import { CourseFilters, DEFAULT_COURSE_FILTERS } from '@/types/courseFilters';
 
 export default function CoursesScreen() {
-  const [selectedTab, setSelectedTab] = useState<CourseType>('course');
+  const [filters, setFilters] = useState<CourseFilters>(DEFAULT_COURSE_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
-  const { courses, allCount, loading } = useCourses(selectedTab, searchQuery);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const filtersSheetRef = useRef<FiltersSheetRef>(null);
 
-  const handleTabToggle = (value: string) => {
-    if (value) setSelectedTab(value as CourseType);
-  };
+  const { courses, allCount, getInstructorsForType, loading } = useCourses(filters, searchQuery);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.levels.length > 0) count++;
+    if (filters.instructors.length > 0) count++;
+    if (filters.fromDate) count++;
+    return count;
+  }, [filters]);
+
+  const handleApplyFilters = useCallback((next: CourseFilters) => {
+    setFilters(next);
+    setSheetOpen(false);
+  }, []);
 
   const handleReset = useCallback(() => {
     setSearchQuery('');
-    setSelectedTab('course');
+    setFilters(DEFAULT_COURSE_FILTERS);
   }, []);
 
-  const handleFilterPress = () => {
-    // TODO: Open filter bottom sheet (next task)
-  };
+  const handleFilterPress = useCallback(() => {
+    setSheetOpen(true);
+  }, []);
+
+  const handleSheetClose = useCallback(() => {
+    setSheetOpen(false);
+  }, []);
+
+  // Close filter sheet when navigating away
+  useFocusEffect(
+    useCallback(() => {
+      return () => setSheetOpen(false);
+    }, []),
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,21 +63,14 @@ export default function CoursesScreen() {
         onFilterPress={handleFilterPress}
       />
 
-      {/* Type filter pills */}
-      <View style={styles.tabs}>
-        <PillSelect
-          items={TAB_ITEMS}
-          selected={[selectedTab]}
-          onToggle={handleTabToggle}
-          mode="single"
-          allowEmpty={false}
-        />
-      </View>
-
       <View style={styles.divider} />
 
       {/* Results header */}
-      <CourseResultsHeader totalResults={allCount} onReset={handleReset} />
+      <CourseResultsHeader
+        totalResults={courses.length}
+        activeFilterCount={activeFilterCount}
+        onReset={handleReset}
+      />
 
       {loading ? (
         <ActivityIndicator
@@ -79,6 +90,18 @@ export default function CoursesScreen() {
           }
         />
       )}
+
+      {/* Filter bottom sheet — only mounted when open to avoid gesture blocking */}
+      {sheetOpen && (
+        <CourseFiltersSheet
+          ref={filtersSheetRef}
+          filters={filters}
+          onApply={handleApplyFilters}
+          onClose={handleSheetClose}
+          resultCount={courses.length}
+          getInstructorsForType={getInstructorsForType}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -87,7 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    padding: 5
+    padding: 5,
   },
   title: {
     fontSize: 28,
@@ -96,10 +119,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: 20,
     paddingHorizontal: 13,
-  },
-  tabs: {
-    paddingHorizontal: 16,
-    marginTop: 12,
   },
   divider: {
     height: 1,

@@ -4,19 +4,26 @@ import { Colors } from '@/constants/colors';
 
 type Props = {
   totalResults: number;
+  activeFilterCount: number;
   onReset: () => void;
 };
 
-export function CourseResultsHeader({ totalResults, onReset }: Props) {
+export function CourseResultsHeader({ totalResults, activeFilterCount, onReset }: Props) {
+  const showReset = activeFilterCount > 0;
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.resetButton} onPress={onReset}>
-        <MaterialCommunityIcons name="restart" size={14} color={Colors.primary} />
-        <Text style={styles.resetText}>איפוס</Text>
-      </TouchableOpacity>
+      {showReset ? (
+        <TouchableOpacity style={styles.resetButton} onPress={onReset}>
+          <MaterialCommunityIcons name="restart" size={14} color={Colors.primary} />
+          <Text style={styles.resetText}>איפוס מסננים ({activeFilterCount})</Text>
+        </TouchableOpacity>
+      ) : (
+        <View />
+      )}
 
       <Text style={styles.resultsText}>
-        מציג את כל התוצאות ({totalResults})
+        מציג {totalResults} תוצאות
       </Text>
     </View>
   );

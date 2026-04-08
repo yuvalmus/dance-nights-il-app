@@ -77,19 +77,25 @@ export function formatCourseDateRange(dates: string[]): string | null {
   if (dates.length === 0) return null;
 
   const sorted = [...dates].sort();
+  const currentYear = new Date().getFullYear();
+  const yearSuffix = (y: number) => y !== currentYear ? ` ${y}` : '';
+
   const start = parseDateParts(sorted[0]);
-  if (sorted.length === 1) return `${start.day} ב${start.month}`;
+  if (sorted.length === 1) return `${start.day} ב${start.month}${yearSuffix(start.year)}`;
 
   const end = parseDateParts(sorted[sorted.length - 1]);
-  if (start.month === end.month) {
-    return `${start.day}-${end.day} ב${start.month}`;
+  if (start.month === end.month && start.year === end.year) {
+    return `${start.day}-${end.day} ב${start.month}${yearSuffix(start.year)}`;
   }
-  return `${start.day} ב${start.month} - ${end.day} ב${end.month}`;
+  if (start.year === end.year) {
+    return `${start.day} ב${start.month} - ${end.day} ב${end.month}${yearSuffix(start.year)}`;
+  }
+  return `${start.day} ב${start.month} ${start.year} - ${end.day} ב${end.month} ${end.year}`;
 }
 
 function parseDateParts(dateStr: string) {
   const d = new Date(dateStr);
-  return { day: d.getDate(), month: HEBREW_MONTHS[d.getMonth()] };
+  return { day: d.getDate(), month: HEBREW_MONTHS[d.getMonth()], year: d.getFullYear() };
 }
 
 // ── Event live helpers ──────────────────────────────────
