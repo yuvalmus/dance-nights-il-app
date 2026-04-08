@@ -1,77 +1,83 @@
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
-import { Course } from '@/types/database';
-import { DANCE_STYLE_LABELS } from '@/constants/config';
+import { DanceLevel } from '@/constants/config';
+import DanceLevelBadge from '@/components/ui/DanceLevelBadge';
+import { isNewCourse, formatCourseDateRange } from '@/lib/date';
+import { CoursePosterOverlay } from '@/components/courses/CoursePosterOverlay';
+import { CourseWithVenue } from '@/hooks/useCourses';
 
 type Props = {
-  course: Course;
+  course: CourseWithVenue;
+  onPress?: () => void;
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  course: 'קורס',
-  bootcamp: 'בוטקמפ',
-  festival: 'פסטיבל',
-};
+export function CourseCard({ course, onPress }: Props) {
+  const isNew = isNewCourse(course.created_at);
+  const dates = formatCourseDateRange(course.dates);
+  const level = (course.level as DanceLevel) ?? null;
 
-export function CourseCard({ course }: Props) {
-  const openRegistration = () => {
-    if (course.registration_url) Linking.openURL(course.registration_url);
-  };
+  const venueName = course.venues?.name ?? null;
+  const venueCity = course.venues?.city ?? null;
+  const locationText = [venueName, venueCity].filter(Boolean).join(', ');
 
   return (
-    <View style={styles.card}>
-      {course.poster_url && (
-        <Image
-          source={{ uri: course.poster_url }}
-          style={styles.poster}
-          contentFit="cover"
-          transition={200}
-        />
+    <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
+      {/* Poster */}
+      {course.poster_url ? (
+        <View style={styles.posterContainer}>
+          <Image
+            source={{ uri: course.poster_url }}
+            style={styles.poster}
+            contentFit="cover"
+            transition={200}
+          />
+          <CoursePosterOverlay isNew={isNew} danceStyle={course.dance_style} />
+        </View>
+      ) : (
+        <View style={[styles.posterContainer, styles.posterPlaceholder]}>
+          <Ionicons name="musical-notes" size={40} color={Colors.textMuted} />
+          <CoursePosterOverlay isNew={isNew} danceStyle={course.dance_style} />
+        </View>
       )}
 
+      {/* Accent divider */}
+      <View style={styles.accentDivider} />
+
+      {/* Content */}
       <View style={styles.content}>
-        <View style={styles.typeBadge}>
-          <Text style={styles.typeBadgeText}>{TYPE_LABELS[course.type] ?? course.type}</Text>
+        {/* Level & Dates row */}
+        <View style={styles.metaRow}>
+          <DanceLevelBadge level={level} size="md" mode='full' />
+          {dates && <Text style={styles.metaText}>{dates}</Text>}
         </View>
 
+        {/* Title */}
         <Text style={styles.title}>{course.title}</Text>
 
+        {/* Instructor */}
         {course.instructor && (
-          <Text style={styles.instructor}>
-            <Ionicons name="person" size={13} color={Colors.textSecondary} /> {course.instructor}
-          </Text>
-        )}
-
-        <View style={styles.details}>
-          {course.schedule && <Text style={styles.detail}>{course.schedule}</Text>}
-          {course.level && <Text style={styles.detail}>{course.level}</Text>}
-          {course.price && <Text style={styles.price}>{course.price}</Text>}
-        </View>
-
-        {course.dance_styles.length > 0 && (
-          <View style={styles.tags}>
-            {course.dance_styles.map((s) => (
-              <View
-                key={s}
-                style={[styles.tag, { backgroundColor: Colors.primary }]}
-              >
-                <Text style={styles.tagText}>
-                  {DANCE_STYLE_LABELS[s as keyof typeof DANCE_STYLE_LABELS] ?? s}
-                </Text>
-              </View>
-            ))}
+          <View style={styles.instructorRow}>
+            <Text style={styles.instructorText}>{course.instructor}</Text>
+            <Ionicons name="people-outline" size={13} color={Colors.textSecondary} />
           </View>
         )}
 
-        {course.registration_url && (
-          <TouchableOpacity style={styles.cta} onPress={openRegistration}>
-            <Text style={styles.ctaText}>הרשמה</Text>
-          </TouchableOpacity>
+        {/* Location */}
+        {locationText.length > 0 && (
+          <View style={styles.locationRow}>
+            <Text style={styles.locationText}>{locationText}</Text>
+            <Ionicons name="location-sharp" size={14} color={Colors.textSecondary} />
+          </View>
         )}
+
+        {/* CTA Button */}
+        <View style={styles.ctaButton}>
+          <Text style={styles.ctaText}>להרשמה עכשיו!</Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -80,80 +86,87 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(212, 160, 23, 0.15)',
+    // Elevation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  posterContainer: {
+    width: '100%',
+    height: 240,
+    position: 'relative',
   },
   poster: {
     width: '100%',
-    height: 160,
+    height: '100%',
+  },
+  posterPlaceholder: {
+    backgroundColor: Colors.surfaceLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accentDivider: {
+    height: 1.5,
+    backgroundColor: 'rgba(212, 160, 23, 0.25)',
   },
   content: {
-    padding: 14,
-    alignItems: 'flex-end',
+    padding: 16,
+    gap: 6,
   },
-  typeBadge: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginBottom: 8,
+  metaRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  typeBadgeText: {
-    color: Colors.background,
-    fontSize: 11,
-    fontWeight: '700',
+  metaText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '500',
   },
   title: {
     color: Colors.text,
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'right',
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginTop: 2,
   },
-  instructor: {
+  instructorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  instructorText: {
     color: Colors.textSecondary,
     fontSize: 13,
-    marginTop: 4,
   },
-  details: {
-    flexDirection: 'row-reverse',
-    gap: 12,
-    marginTop: 8,
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginTop: 2,
   },
-  detail: {
-    color: Colors.textMuted,
+  locationText: {
+    color: Colors.textSecondary,
     fontSize: 13,
   },
-  price: {
-    color: Colors.primary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  tags: {
-    flexDirection: 'row-reverse',
-    gap: 6,
-    marginTop: 10,
-  },
-  tag: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  tagText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  cta: {
+  ctaButton: {
     backgroundColor: Colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 10,
-    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 10,
   },
   ctaText: {
     color: Colors.background,
-    fontWeight: '700',
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

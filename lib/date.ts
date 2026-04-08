@@ -49,6 +49,57 @@ export function getLastNightKey(): string {
  * @param eventDate  - YYYY-MM-DD string
  * @param firstTime  - HH:MM string (e.g. "21:00")
  */
+// ── Hebrew month names (shared) ─────────────────────────
+
+const HEBREW_MONTHS = [
+  'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+  'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר',
+] as const;
+
+// ── Course date helpers ─────────────────────────────────
+
+/** Number of days within which a course is considered "new". */
+const NEW_COURSE_DAYS = 7;
+const MS_IN_DAY = 24 * 60 * 60 * 1000;
+
+/** Whether a course was created within the last NEW_COURSE_DAYS days. */
+export function isNewCourse(createdAt: string): boolean {
+  const diffMs = Date.now() - new Date(createdAt).getTime();
+  return diffMs < NEW_COURSE_DAYS * MS_IN_DAY;
+}
+
+/**
+ * Format a dates array into a Hebrew date range string.
+ * e.g. ["2026-05-12","2026-05-14"] → "12-14 במאי"
+ * e.g. ["2026-05-12","2026-06-14"] → "12 במאי - 14 ביוני"
+ */
+export function formatCourseDateRange(dates: string[]): string | null {
+  if (dates.length === 0) return null;
+
+  const sorted = [...dates].sort();
+  const currentYear = new Date().getFullYear();
+  const yearSuffix = (y: number) => y !== currentYear ? ` ${y}` : '';
+
+  const start = parseDateParts(sorted[0]);
+  if (sorted.length === 1) return `${start.day} ב${start.month}${yearSuffix(start.year)}`;
+
+  const end = parseDateParts(sorted[sorted.length - 1]);
+  if (start.month === end.month && start.year === end.year) {
+    return `${start.day}-${end.day} ב${start.month}${yearSuffix(start.year)}`;
+  }
+  if (start.year === end.year) {
+    return `${start.day} ב${start.month} - ${end.day} ב${end.month}${yearSuffix(start.year)}`;
+  }
+  return `${start.day} ב${start.month} ${start.year} - ${end.day} ב${end.month} ${end.year}`;
+}
+
+function parseDateParts(dateStr: string) {
+  const d = new Date(dateStr);
+  return { day: d.getDate(), month: HEBREW_MONTHS[d.getMonth()], year: d.getFullYear() };
+}
+
+// ── Event live helpers ──────────────────────────────────
+
 export function isEventLive(eventDate: string, firstTime: string | undefined): boolean {
   if (!firstTime) return false;
 

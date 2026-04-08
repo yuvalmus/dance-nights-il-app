@@ -21,6 +21,12 @@ export const Colors = {
   error: '#e74c3c',
   shelter: '#3498db',
 
+  // Dance levels
+  levelBeginner: '#2ecc71',
+  levelIntermediate: '#f39c12',
+  levelMaster: '#e74c3c',
+  levelOpen: '#3b9dff',
+
   // UI
   border: '#2a2a4a',
   brighterBorder: '#3c3c4c',
