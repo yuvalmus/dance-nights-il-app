@@ -64,6 +64,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         color: "#d4a017",
       },
     ],
+    [
+      'expo-calendar',
+      {
+        calendarPermission: 'Bailando צריכה גישה ללוח השנה כדי להוסיף שיעורים.',
+      },
+    ],
     "expo-asset",
     [
       "expo-font",
