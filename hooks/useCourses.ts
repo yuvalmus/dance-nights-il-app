@@ -6,8 +6,8 @@ import { cachedFetch, invalidate, TTL } from '@/lib/cache';
 import { CourseFilters, DEFAULT_COURSE_FILTERS } from '@/types/courseFilters';
 
 export type CourseWithVenue = Course & {
-  venues: { name: string; city: string } | null;
-  course_schedules: Pick<CourseSchedule, 'day' | 'start_time' | 'end_time'>[];
+  venues: { name: string; city: string; address?: string; location?: unknown; slug: string; theme_colors: string[] } | null;
+  course_schedules: Pick<CourseSchedule, 'date' | 'start_time' | 'end_time' | 'description'>[];
 };
 
 const CACHE_KEY = 'courses:all';
@@ -25,13 +25,10 @@ export function useCourses(
       setLoading(true);
       setError(null);
 
-      const data = await cachedFetch(cacheKey, TTL.COURSES, async () => {
-        let query = supabase
-      }
       const data = await cachedFetch(CACHE_KEY, TTL.COURSES, async () => {
         const { data, error: queryError } = await supabase
           .from('courses')
-          .select('*, venues(name, city), course_schedules(day, start_time, end_time)')
+          .select('*, venues(name, city, address, location, slug, theme_colors), course_schedules(date, start_time, end_time, description)')
           .eq('is_published', true)
           .order('created_at', { ascending: false });
 
@@ -75,9 +72,9 @@ export function useCourses(
     if (filters.fromDate) {
       const from = filters.fromDate;
       result = result.filter((c) => {
-        if (c.dates.length === 0) return false;
-        const firstDate = [...c.dates].sort()[0];
-        return firstDate >= from;
+        const dates = c.course_schedules.map((s) => s.date).sort();
+        if (dates.length === 0) return false;
+        return dates[0] >= from;
       });
     }
 
@@ -90,6 +87,12 @@ export function useCourses(
         c.venues?.name?.toLowerCase().includes(q)
       );
     }
+
+    result.sort((a, b) => {
+      const aDate = a.course_schedules.map((s) => s.date).sort()[0] ?? '';
+      const bDate = b.course_schedules.map((s) => s.date).sort()[0] ?? '';
+      return aDate.localeCompare(bDate);
+    });
 
     return result;
   }, [coursesForType, filters.levels, filters.instructors, filters.fromDate, searchQuery]);
@@ -108,10 +111,17 @@ export function useCourses(
     return fetchCourses();
   }, [fetchCourses]);
 
+  const getCourseById = useCallback(
+    (id: string) => allCourses.find((c) => c.id === id) ?? null,
+    [allCourses],
+  );
+
   return {
     courses: filteredCourses,
+    allCourses,
     allCount: coursesForType.length,
     getInstructorsForType,
+    getCourseById,
     loading,
     error,
     refetch,

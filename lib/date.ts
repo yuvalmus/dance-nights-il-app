@@ -40,6 +40,12 @@ export function getLastNightKey(): string {
   return formatDateKey(d);
 }
 
+export function getDayName(dateStr: string, isHebrew: boolean = false): string {
+  const dayIndex = new Date(dateStr).getDay();
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return isHebrew ? HEBREW_DAYS[days[dayIndex]] ?? days[dayIndex] : days[dayIndex];
+}
+
 /**
  * Check whether an event is currently live.
  *
@@ -50,6 +56,16 @@ export function getLastNightKey(): string {
  * @param firstTime  - HH:MM string (e.g. "21:00")
  */
 // ── Hebrew month names (shared) ─────────────────────────
+
+export const HEBREW_DAYS: Record<string, string> = {
+  sunday: 'יום ראשון',
+  monday: 'יום שני',
+  tuesday: 'יום שלישי',
+  wednesday: 'יום רביעי',
+  thursday: 'יום חמישי',
+  friday: 'יום שישי',
+  saturday: 'שבת',
+};
 
 const HEBREW_MONTHS = [
   'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',

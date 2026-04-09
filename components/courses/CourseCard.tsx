@@ -15,7 +15,8 @@ type Props = {
 
 export function CourseCard({ course, onPress }: Props) {
   const isNew = isNewCourse(course.created_at);
-  const dates = formatCourseDateRange(course.dates);
+  const scheduleDates = course.course_schedules.map((s) => s.date).sort();
+  const dates = formatCourseDateRange(scheduleDates);
   const level = (course.level as DanceLevel) ?? null;
 
   const venueName = course.venues?.name ?? null;
