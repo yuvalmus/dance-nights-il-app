@@ -3,9 +3,11 @@ import { Tabs } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@/components/ui/Icon';
 import CurvedTabBar from '@/components/navigation/CurvedTabBar';
 import { CurvedTabBarRef } from '@/components/navigation/tabBarConfig';
+import { usePrefetchProfile } from '@/hooks/usePrefetchProfile';
 
 export default function TabLayout() {
   const tabBarRef = useRef<CurvedTabBarRef>(null);
+  usePrefetchProfile();
 
   return (
     <Tabs
