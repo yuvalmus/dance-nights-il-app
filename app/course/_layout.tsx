@@ -18,7 +18,7 @@ export default function CourseLayout() {
         headerLeft: () => null,
         headerRight: () => (
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/courses')}
             style={styles.backButton}
           >
             <Text style={styles.backText}>חזרה</Text>

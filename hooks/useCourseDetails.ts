@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { cachedFetch, TTL } from '@/lib/cache';
+import { isValidCourseId } from '@/lib/courseShare';
 import { CourseWithVenue } from './useCourses';
 
 /**
@@ -15,6 +16,12 @@ export function useCourseDetails(courseId: string | undefined) {
   const fetchCourse = useCallback(async () => {
     if (!courseId) return;
 
+    if (!isValidCourseId(courseId)) {
+      setError('invalid_id');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -27,6 +34,7 @@ export function useCourseDetails(courseId: string | undefined) {
             .from('courses')
             .select('*, venues(name, city, address, location, slug, theme_colors), course_schedules(date, start_time, end_time, description)')
             .eq('id', courseId)
+            .eq('is_published', true)
             .single();
 
           if (queryError) throw queryError;

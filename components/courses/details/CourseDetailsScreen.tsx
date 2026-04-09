@@ -1,7 +1,11 @@
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigation } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { useCourseDetails } from '@/hooks/useCourseDetails';
 import { openNavigation } from '@/lib/navigation';
+import { shareCourseLink } from '@/lib/courseShare';
+import { addCourseSchedulesToCalendar } from '@/lib/courseCalendar';
 import CourseHeroPoster from './CourseHeroPoster';
 import CourseMetaSection from './CourseMetaSection';
 import CourseStructureAccordion from './CourseStructureAccordion';
@@ -9,13 +13,78 @@ import CourseAnnouncementsSection from './CourseAnnouncementsSection';
 import CourseLearningSection from './CourseLearningSection';
 import { AddressBox } from '@/components/events/card/AddressBox';
 import CourseBottomBar from './CourseBottomBar';
+import CourseHeaderActions from './CourseHeaderActions';
 
 type Props = {
   courseId: string | undefined;
 };
 
 export default function CourseDetailsScreen({ courseId }: Props) {
+  const navigation = useNavigation();
   const { course, loading, error } = useCourseDetails(courseId);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+
+  const handleShare = useCallback(() => {
+    if (!course) return;
+    shareCourseLink({ courseId: course.id, title: course.title });
+  }, [course]);
+
+  const handleAddToCalendar = useCallback(() => {
+    if (!course) return;
+    const count = course.course_schedules.length;
+    const sessionsText = count === 1 ? 'מפגש אחד' : `${count} מפגשים`;
+    Alert.alert(
+      'הוספה ללוח שנה',
+      `יתווספו ${sessionsText} של "${course.title}" ללוח השנה שלך.`,
+      [
+        { text: 'ביטול', style: 'cancel' },
+        {
+          text: 'הוסף',
+          onPress: async () => {
+            setCalendarLoading(true);
+            try {
+              const result = await addCourseSchedulesToCalendar(
+                course.course_schedules,
+                course.title,
+                course.id,
+                course.venues,
+              );
+              const total = result.created + result.failed;
+              const message =
+                result.failed === 0
+                  ? `נוצרו ${result.created} אירועים בלוח השנה`
+                  : `נוצרו ${result.created} מתוך ${total} אירועים`;
+              Alert.alert('לוח שנה', message);
+            } catch (err: any) {
+              if (err.message === 'permission_denied') {
+                Alert.alert('נדרשת הרשאה', 'יש לאפשר גישה ללוח השנה בהגדרות המכשיר');
+              } else if (err.message === 'no_calendar') {
+                Alert.alert('שגיאה', 'לא נמצא לוח שנה זמין במכשיר');
+              } else {
+                Alert.alert('שגיאה', 'לא ניתן להוסיף אירועים ללוח השנה');
+              }
+            } finally {
+              setCalendarLoading(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [course]);
+
+  useEffect(() => {
+    if (!course) return;
+    navigation.setOptions({
+      headerLeft: () => (
+        <CourseHeaderActions
+          onShare={handleShare}
+          onAddToCalendar={handleAddToCalendar}
+          calendarLoading={calendarLoading}
+          calendarDisabled={course.course_schedules.length === 0}
+        />
+      ),
+    });
+  }, [course, navigation, handleShare, handleAddToCalendar, calendarLoading]);
 
   if (loading) {
     return (
