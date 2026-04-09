@@ -35,6 +35,12 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="course"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
         <NavigationSheet ref={navigationSheetRef} />
       </AuthProvider>

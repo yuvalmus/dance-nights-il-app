@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { useCourses } from '@/hooks/useCourses';
 import { CourseCard } from '@/components/courses/CourseCard';
@@ -11,6 +11,7 @@ import SearchBar from '@/components/ui/SearchBar';
 import { CourseFilters, DEFAULT_COURSE_FILTERS } from '@/types/courseFilters';
 
 export default function CoursesScreen() {
+  const router = useRouter();
   const [filters, setFilters] = useState<CourseFilters>(DEFAULT_COURSE_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -82,7 +83,12 @@ export default function CoursesScreen() {
         <FlatList
           data={courses}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <CourseCard course={item} />}
+          renderItem={({ item }) => (
+            <CourseCard
+              course={item}
+              onPress={() => router.push({ pathname: '/course/details', params: { courseId: item.id } })}
+            />
+          )}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

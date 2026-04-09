@@ -237,13 +237,14 @@ export interface Database {
           level: string | null;
           instructor: string | null;
           instructor_id: string | null;
-          dates: string[];
-          price: string | null;
+          price: number | null;
           spots_total: number | null;
           spots_taken: number;
           poster_url: string | null;
           registration_url: string | null;
           is_published: boolean;
+          announcements: string[];
+          learning_outcomes: string[];
           created_by: string | null;
           created_at: string;
         };
@@ -281,9 +282,10 @@ export interface Database {
         Row: {
           id: string;
           course_id: string;
-          day: string;
+          date: string;
           start_time: string;
           end_time: string;
+          description: string | null;
         };
         Insert: Omit<Database['public']['Tables']['course_schedules']['Row'], 'id'> & {
           id?: string;
