@@ -1,11 +1,8 @@
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { Ionicons } from '@/components/ui/Icon';
+import { Stack } from 'expo-router';
 import { Colors } from '@/constants/colors';
+import BackButton from '@/components/ui/BackButton';
 
 export default function CourseLayout() {
-  const router = useRouter();
-
   return (
     <Stack
       screenOptions={{
@@ -16,32 +13,10 @@ export default function CourseLayout() {
         headerTitleAlign: 'center',
         headerBackVisible: false,
         headerLeft: () => null,
-        headerRight: () => (
-          <TouchableOpacity
-            onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/courses')}
-            style={styles.backButton}
-            hitSlop={8}
-          >
-            <Text style={styles.backText}>חזרה</Text>
-            <Ionicons name="chevron-forward" size={22} color={Colors.text} />
-          </TouchableOpacity>
-        ),
+        headerRight: () => <BackButton fallbackRoute="/(tabs)/courses" />,
         headerRightContainerStyle: { flexGrow: 0 },
         contentStyle: { backgroundColor: Colors.background },
       }}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 5,
-  },
-  backText: {
-    color: Colors.text,
-    fontSize: 15,
-  },
-});
