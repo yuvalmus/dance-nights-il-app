@@ -14,7 +14,6 @@ export default function VenueLayout() {
         headerBackVisible: false,
         headerLeft: () => null,
         headerRight: () => <BackButton />,
-        headerRightContainerStyle: { flexGrow: 0 },
         contentStyle: { backgroundColor: Colors.background },
       }}
     />

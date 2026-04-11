@@ -14,7 +14,6 @@ export default function CourseLayout() {
         headerBackVisible: false,
         headerLeft: () => null,
         headerRight: () => <BackButton fallbackRoute="/(tabs)/courses" />,
-        headerRightContainerStyle: { flexGrow: 0 },
         contentStyle: { backgroundColor: Colors.background },
       }}
     />

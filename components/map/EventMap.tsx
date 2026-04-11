@@ -65,6 +65,12 @@ export const EventMap = forwardRef<MapRef, Props>(
 
       const lats = events.map((e) => e.venue_lat);
       const lngs = events.map((e) => e.venue_lng);
+
+      if (userLocation) {
+        lats.push(userLocation.latitude);
+        lngs.push(userLocation.longitude);
+      }
+
       const latSpan = Math.max(
         Math.max(...lats) - Math.min(...lats),
         MIN_DELTA,

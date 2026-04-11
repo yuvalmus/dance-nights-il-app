@@ -84,6 +84,7 @@ export default function TonightScreen() {
 
   const handleFitAll = useCallback(() => {
     setSelectedEventId(null);
+    sheetRef.current?.peek();
     mapRef.current?.fitAll();
   }, []);
 
