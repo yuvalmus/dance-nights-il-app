@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
+import { DanceLevel } from '@/constants/config';
 import { LiveBadge } from './LiveBadge';
 import { QuickInfo } from './QuickInfo';
 import { BadgeRow } from './BadgeRow';
@@ -8,7 +9,7 @@ import { BadgeRow } from './BadgeRow';
 type Props = {
   event: EventWithVenue;
   accentColor: string;
-  levelBadges: string[];
+  levelBadges: (DanceLevel | null)[];
   distanceKm: string;
   isLive?: boolean;
 };

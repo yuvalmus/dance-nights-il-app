@@ -8,6 +8,7 @@ import { Colors } from '@/constants/colors';
 import { Ionicons } from '@/components/ui/Icon';
 import { updateEvent } from '@/lib/eventService';
 import EventForm, { EventFormValues } from '@/components/venue/EventForm';
+import BackButton from '@/components/ui/BackButton';
 import type { Event, EventSchedule } from '@/types/database';
 import { formatTime } from '@/lib/date';
 
@@ -104,7 +105,7 @@ export default function EditEventScreen() {
   if (fetching) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
-        <Stack.Screen options={{ title: 'עריכת אירוע' }} />
+        <Stack.Screen options={{ title: 'עריכת אירוע', headerRight: () => <BackButton /> }} />
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
@@ -115,6 +116,7 @@ export default function EditEventScreen() {
       <Stack.Screen
         options={{
           title: 'עריכת אירוע',
+          headerRight: () => <BackButton />,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => submitRef.current?.()}

@@ -4,8 +4,8 @@ import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 
 const ACTIVE_DOT_SIZE = 10;
 const ACTIVE_DOT_OPACITY = 1;
-const INACTIVE_DOT_SIZE = 7;
-const INACTIVE_DOT_OPACITY = 0.7;
+const INACTIVE_DOT_SIZE = 9;
+const INACTIVE_DOT_OPACITY = 0.9;
 const ANIMATION_DURATION = 250;
 
 type Props = {

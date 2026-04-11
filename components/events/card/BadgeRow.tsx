@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
-import { DANCE_STYLE_LABELS } from '@/constants/config';
+import { DanceLevel, DANCE_STYLE_LABELS } from '@/constants/config';
+import DanceLevelBadge from '@/components/ui/DanceLevelBadge';
 
 type Props = {
   danceStyles: string[];
-  levelBadges: string[];
+  levelBadges: (DanceLevel | null)[];
   accentColor: string;
   hasShelter?: boolean;
 };
@@ -19,9 +20,9 @@ export function BadgeRow({ danceStyles, levelBadges, accentColor, hasShelter }: 
           </Text>
         </View>
       ))}
-      {levelBadges.map((level) => (
-        <View key={level} style={[styles.badge, styles.levelBadge, { borderColor: `${accentColor}40` }]}>
-          <Text style={[styles.badgeText, { color: accentColor }]}>{level}</Text>
+      {levelBadges.map((level, i) => (
+        <View key={level ?? 'open'} style={[styles.badge, styles.levelBadge]}>
+          <DanceLevelBadge level={level} mode="icon" size="sm" pressable />
         </View>
       ))}
       {hasShelter && (
@@ -60,6 +61,7 @@ const styles = StyleSheet.create({
   levelBadge: {
     backgroundColor: 'transparent',
     borderWidth: 1,
+    borderColor: `${Colors.primary}50`,
   },
   shelterBadge: {
     backgroundColor: 'rgba(34,197,94,0.12)',

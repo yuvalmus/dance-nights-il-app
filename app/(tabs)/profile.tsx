@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@/components/ui/Icon';
+import { Ionicons,MaterialCommunityIcons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/lib/auth';
 import { useProfile } from '@/hooks/useProfile';
@@ -20,7 +20,7 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loginPrompt}>
-          <Ionicons name="person-circle-outline" size={80} color={Colors.textMuted} />
+          <MaterialCommunityIcons name="human-female-dance" size={60} color={Colors.textMuted} />
           <Text style={styles.loginTitle}>התחבר כדי לשמור העדפות</Text>
           <Text style={styles.loginSubtitle}>
             ניתן לגלוש באפליקציה ללא התחברות
@@ -56,7 +56,7 @@ export default function ProfileScreen() {
 
         {/* User info */}
         <View style={styles.card}>
-          <Ionicons name="person-circle" size={48} color={Colors.primary} />
+          <MaterialCommunityIcons name="human-female-dance" size={35} color={Colors.primary} />
           <View style={styles.userInfo}>
             <Text style={styles.userName}>
               {profile?.display_name || 'רקדן/ית'}

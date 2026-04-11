@@ -46,6 +46,7 @@ export default function PillSelect({
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
+      style={styles.rtlScroll}
     >
       {items.map((item) => {
         const isActive = selected.includes(item.value);
@@ -56,6 +57,7 @@ export default function PillSelect({
             key={item.value}
             style={[
               styles.pill,
+              styles.rtlItem,
               isSmall && styles.pillSmall,
               isActive && { backgroundColor: activeBg, borderColor: activeBg },
             ]}
@@ -77,10 +79,16 @@ export default function PillSelect({
 }
 
 const styles = StyleSheet.create({
+  rtlScroll: {
+    transform: [{ scaleX: -1 }],
+  },
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     flexGrow: 1,
     gap: 8,
+  },
+  rtlItem: {
+    transform: [{ scaleX: -1 }],
   },
   pill: {
     paddingHorizontal: 16,

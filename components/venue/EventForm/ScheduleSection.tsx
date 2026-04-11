@@ -79,11 +79,11 @@ export default function ScheduleSection({ schedules, initialExpanded, onAdd, onU
               <View style={styles.scheduleFields}>
                 <Text style={styles.fieldLabel}>שעה</Text>
                 <TouchableOpacity
-                  style={styles.timeButton}
-                  onPress={() => setShowTimePicker(index)}
+                  style={[styles.timeButton, showTimePicker === index && styles.timeButtonActive]}
+                  onPress={() => setShowTimePicker((prev) => prev === index ? null : index)}
                 >
                   <Ionicons name="time-outline" size={18} color={Colors.primary} />
-                  <Text style={[styles.timeText, !entry.time && { color: Colors.textMuted }]}>
+                  <Text style={[styles.timeText, !entry.time && { color: Colors.textMuted }, showTimePicker === index && styles.timeTextActive]}>
                     {entry.time || 'בחר שעה'}
                   </Text>
                 </TouchableOpacity>
@@ -112,10 +112,13 @@ export default function ScheduleSection({ schedules, initialExpanded, onAdd, onU
                 />
                 <Text style={styles.fieldLabel}>רמה</Text>
                 <PillSelect
-                  items={DANCE_LEVELS.map((l) => ({
-                    value: l,
-                    label: DANCE_LEVEL_LABELS[l],
-                  }))}
+                  items={[
+                    { value: 'open', label: 'כל הרמות' },
+                    ...DANCE_LEVELS.map((l) => ({
+                      value: l,
+                      label: DANCE_LEVEL_LABELS[l],
+                    })),
+                  ]}
                   selected={entry.level ? [entry.level] : []}
                   onToggle={(v) => onUpdate(index, 'level', v)}
                   mode="single"
@@ -176,6 +179,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+  },
+  timeButtonActive: {
+    borderColor: Colors.primary,
+  },
+  timeTextActive: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
   timeText: {
     color: Colors.text,
