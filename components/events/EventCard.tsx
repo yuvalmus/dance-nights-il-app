@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue, RegistrationLink } from '@/types/database';
-import { DANCE_LEVEL_LABELS } from '@/constants/config';
+import { DanceLevel } from '@/constants/config';
 import { isEventLive } from '@/lib/date';
 import { openNavigation } from '@/lib/navigation';
 import { SpotsBar } from '@/components/ui/SpotsBar';
@@ -35,16 +35,14 @@ export function EventCard({ event, isExpanded, onPress }: Props) {
   const hasCoordinates = !!(event.venue_lat && event.venue_lng);
   const live = isEventLive(event.date, event.schedules?.[0]?.time);
 
-  const levelBadges = useMemo(() => {
-    if (!event.schedules || event.schedules.length === 0) return ['כל הרמות'];
+  const levelBadges = useMemo((): (DanceLevel | null)[] => {
+    if (!event.schedules || event.schedules.length === 0) return [null];
     const levels = event.schedules
       .map((s) => s.level)
       .filter((l): l is string => l != null);
-    if (levels.length === 0) return ['כל הרמות'];
+    if (levels.length === 0) return [null];
     const unique = [...new Set(levels)];
-    return unique.map(
-      (l) => DANCE_LEVEL_LABELS[l as keyof typeof DANCE_LEVEL_LABELS] ?? l,
-    );
+    return unique.map((l) => (l === 'open' ? null : l as DanceLevel));
   }, [event.schedules]);
 
   const accumulated = useMemo(

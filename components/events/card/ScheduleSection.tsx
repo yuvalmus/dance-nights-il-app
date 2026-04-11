@@ -1,7 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
+import { DanceLevel } from '@/constants/config';
 import { formatTime } from '@/lib/date';
+import DanceLevelBadge from '@/components/ui/DanceLevelBadge';
 
 type Schedule = {
   time: string;
@@ -26,7 +28,16 @@ export function ScheduleSection({ schedules, accentColor }: Props) {
           key={i}
           style={[styles.row, i < schedules.length - 1 && styles.rowBorder]}
         >
-          <Text style={[styles.time, { color: accentColor }]}>{formatTime(schedule.time)}</Text>
+          <View style={styles.timeLevelRow}>
+            <Text style={[styles.time, { color: accentColor }]}>{formatTime(schedule.time)}</Text>
+            {schedule.level && (
+              <DanceLevelBadge
+                level={schedule.level === 'open' ? null : schedule.level as DanceLevel}
+                mode="icon"
+                size="sm"
+              />
+            )}
+          </View>
           <Text style={styles.desc}>{schedule.description}</Text>
         </View>
       ))}
@@ -50,11 +61,17 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingVertical: 5,
   },
   rowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.04)',
+  },
+  timeLevelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   desc: {
     color: Colors.textSecondary,
@@ -66,6 +83,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
-    width: 46,
   },
 });

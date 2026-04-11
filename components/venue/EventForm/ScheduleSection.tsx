@@ -112,10 +112,13 @@ export default function ScheduleSection({ schedules, initialExpanded, onAdd, onU
                 />
                 <Text style={styles.fieldLabel}>רמה</Text>
                 <PillSelect
-                  items={DANCE_LEVELS.map((l) => ({
-                    value: l,
-                    label: DANCE_LEVEL_LABELS[l],
-                  }))}
+                  items={[
+                    { value: 'open', label: 'כל הרמות' },
+                    ...DANCE_LEVELS.map((l) => ({
+                      value: l,
+                      label: DANCE_LEVEL_LABELS[l],
+                    })),
+                  ]}
                   selected={entry.level ? [entry.level] : []}
                   onToggle={(v) => onUpdate(index, 'level', v)}
                   mode="single"
