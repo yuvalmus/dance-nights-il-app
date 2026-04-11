@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   timeLevelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 9,
   },
   desc: {
     color: Colors.textSecondary,
