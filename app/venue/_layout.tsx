@@ -20,11 +20,13 @@ export default function VenueLayout() {
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}
+            hitSlop={8}
           >
             <Text style={styles.backText}>חזרה</Text>
             <Ionicons name="chevron-forward" size={22} color={Colors.text} />
           </TouchableOpacity>
         ),
+        headerRightContainerStyle: { flexGrow: 0 },
         contentStyle: { backgroundColor: Colors.background },
       }}
     />

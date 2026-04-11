@@ -20,11 +20,13 @@ export default function CourseLayout() {
           <TouchableOpacity
             onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/courses')}
             style={styles.backButton}
+            hitSlop={8}
           >
             <Text style={styles.backText}>חזרה</Text>
             <Ionicons name="chevron-forward" size={22} color={Colors.text} />
           </TouchableOpacity>
         ),
+        headerRightContainerStyle: { flexGrow: 0 },
         contentStyle: { backgroundColor: Colors.background },
       }}
     />
