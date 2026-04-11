@@ -171,12 +171,12 @@ export function DateToggle({ selectedDate, onDateSelect }: Props) {
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    zIndex: 19,
+    zIndex: 2,
   },
   anchor: {
     position: "absolute",
     right: 14,
-    zIndex: 20,
+    zIndex: 3,
     alignItems: "flex-end",
   },
   toggleBtn: {
