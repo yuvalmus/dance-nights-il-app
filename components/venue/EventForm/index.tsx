@@ -98,11 +98,11 @@ export default function EventForm({
 
         <Text style={styles.fieldLabel}>תאריך</Text>
         <TouchableOpacity
-          style={[styles.dateButton, errors.date && styles.dateButtonError]}
-          onPress={() => setShowDatePicker(true)}
+          style={[styles.dateButton, errors.date && styles.dateButtonError, showDatePicker && styles.dateButtonActive]}
+          onPress={() => setShowDatePicker((prev) => !prev)}
         >
           <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
-          <Text style={styles.dateText}>{dateDisplay}</Text>
+          <Text style={[styles.dateText, showDatePicker && styles.dateTextActive]}>{dateDisplay}</Text>
         </TouchableOpacity>
         {errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
 
@@ -222,6 +222,13 @@ const styles = StyleSheet.create({
   },
   dateButtonError: {
     borderColor: Colors.error,
+  },
+  dateButtonActive: {
+    borderColor: Colors.primary,
+  },
+  dateTextActive: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
   dateText: {
     color: Colors.text,
