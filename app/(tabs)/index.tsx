@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   fitButton: {
     position: "absolute",
     right: 14,
+    zIndex: 1,
     width: 40,
     height: 40,
     borderRadius: 20,

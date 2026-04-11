@@ -47,7 +47,7 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
   const snapPoints = useMemo(() => {
     const available = SCREEN_HEIGHT - bottomInset;
     const mid = available * 0.45;
-    const full = available * 0.85;
+    const full = available * 0.9;
     return [PEEK_HEIGHT, Math.max(mid, PEEK_HEIGHT + 50), Math.max(full, PEEK_HEIGHT + 100)];
   }, [bottomInset]);
 
@@ -107,7 +107,7 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
   );
 
   return (
-    <>
+    <View style={styles.sheetWrapper}>
       <View style={[styles.pullTab, { bottom: pullTabBottom }]}>
         <TouchableOpacity
           onPress={openSheet}
@@ -157,11 +157,16 @@ export const EventBottomSheet = forwardRef<SheetRef, Props>(({
           />
         )}
       </BottomSheet>
-    </>
+    </View>
   );
 });
 
 const styles = StyleSheet.create({
+  sheetWrapper: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+    pointerEvents: 'box-none',
+  },
   background: {
     backgroundColor: Colors.background,
     borderTopLeftRadius: 20,
