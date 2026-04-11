@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, Text, Linking, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Colors } from '@/constants/colors';
 import { RegistrationLink } from '@/types/database';
 import { SpotsBar, getUrgency } from '@/components/ui/SpotsBar';
