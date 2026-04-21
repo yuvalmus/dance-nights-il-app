@@ -6,6 +6,8 @@ import { Venue } from '@/types/database';
 import { EventWithSchedules } from '@/hooks/useVenue';
 import ActionButton from '@/components/ui/ActionButton';
 import VenueEventRow from './VenueEventRow';
+import InstructorSection from './InstructorSection';
+import ApprovalInboxSection from './ApprovalInboxSection';
 
 type MyVenueSectionProps = {
   venue: Venue;
@@ -76,6 +78,9 @@ export default function MyVenueSection({
       {events.length === 0 && (
         <Text style={styles.emptyText}>אין אירועים עדיין. הוסף את האירוע הראשון שלך!</Text>
       )}
+
+      <ApprovalInboxSection venueId={venue.id} />
+      <InstructorSection venueId={venue.id} />
     </View>
   );
 }

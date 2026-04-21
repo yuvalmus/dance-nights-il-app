@@ -30,6 +30,7 @@ export function useCourses(
           .from('courses')
           .select('*, venues(name, city, address, location, slug, theme_colors), course_schedules(date, start_time, end_time, description)')
           .eq('is_published', true)
+          .in('approval_status', ['approved', 'not_required'])
           .order('created_at', { ascending: false });
 
         if (queryError) throw queryError;

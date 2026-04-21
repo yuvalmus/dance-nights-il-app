@@ -41,10 +41,13 @@ export function clearCache() {
 }
 
 export const TTL = {
-  EVENTS: 15 * 60 * 1000,       // 15 min
-  COURSES: 30 * 60 * 1000,      // 30 min
-  POLL: 5 * 60 * 1000,          // 5 min
-  PROFILE: 10 * 60 * 1000,      // 10 min
-  VENUE: 30 * 60 * 1000,        // 30 min — venue ownership rarely changes
-  VENUE_EVENTS: 5 * 60 * 1000,  // 5 min — venue owner checks events often
+  EVENTS: 15 * 60 * 1000,            // 15 min
+  COURSES: 30 * 60 * 1000,           // 30 min
+  POLL: 5 * 60 * 1000,               // 5 min
+  PROFILE: 10 * 60 * 1000,           // 10 min
+  VENUE: 30 * 60 * 1000,             // 30 min — venue ownership rarely changes
+  VENUE_EVENTS: 5 * 60 * 1000,       // 5 min — venue owner checks events often
+  AFFILIATIONS: 5 * 60 * 1000,       // 5 min — rare transitions, checked on focus
+  NOTIFICATIONS: 2 * 60 * 1000,      // 2 min — short-lived, "inbox" style
+  COURSE_APPROVAL: 2 * 60 * 1000,    // 2 min — venue-owner inbox
 } as const;

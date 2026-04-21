@@ -9,6 +9,8 @@ import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS, Dan
 import { useVenue } from '@/hooks/useVenue';
 import MyVenueSection from '@/components/venue/MyVenueSection';
 import PillSelect from '@/components/ui/PillSelect';
+import AffiliationsSection from '@/components/profile/AffiliationsSection';
+import NotificationsSection from '@/components/profile/NotificationsSection';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -62,8 +64,17 @@ export default function ProfileScreen() {
               {profile?.display_name || 'רקדן/ית'}
             </Text>
             <Text style={styles.userEmail}>{user.email}</Text>
+            {profile?.is_artist && (
+              <View style={styles.artistBadge}>
+                <Ionicons name="checkmark-circle" size={14} color={Colors.primary} />
+                <Text style={styles.artistBadgeText}>אמן מאומת</Text>
+              </View>
+            )}
           </View>
         </View>
+
+        {/* Notifications */}
+        <NotificationsSection />
 
         {/* Venue owner section */}
         {venue && (
@@ -74,6 +85,9 @@ export default function ProfileScreen() {
             onDelete={deleteEvent}
           />
         )}
+
+        {/* Venue affiliations (instructor perspective) */}
+        <AffiliationsSection />
 
         {/* Dance level */}
         <Text style={styles.sectionTitle}>רמת ריקוד</Text>
@@ -145,6 +159,21 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 14,
     marginTop: 2,
+  },
+  artistBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceLight,
+  },
+  artistBadgeText: {
+    color: Colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
   },
   sectionTitle: {
     color: Colors.text,
