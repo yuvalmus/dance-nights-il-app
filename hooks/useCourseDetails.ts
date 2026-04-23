@@ -4,14 +4,28 @@ import { cachedFetch, TTL } from '@/lib/cache';
 import { isValidCourseId } from '@/lib/courseShare';
 import { CourseWithVenue } from './useCourses';
 
+type UseCourseDetailsOptions = {
+  /**
+   * Include unpublished courses — used by the venue owner's approval flow
+   * where the course hasn't been published yet. RLS still gates visibility,
+   * so random callers can't bypass publish state via this flag.
+   */
+  includeUnpublished?: boolean;
+};
+
 /**
  * Fetches a single course by ID.
  * Tries the shared courses cache first, falls back to a dedicated per-course fetch.
  */
-export function useCourseDetails(courseId: string | undefined) {
+export function useCourseDetails(
+  courseId: string | undefined,
+  options?: UseCourseDetailsOptions,
+) {
   const [course, setCourse] = useState<CourseWithVenue | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const includeUnpublished = options?.includeUnpublished ?? false;
 
   const fetchCourse = useCallback(async () => {
     if (!courseId) return;
@@ -26,16 +40,24 @@ export function useCourseDetails(courseId: string | undefined) {
       setLoading(true);
       setError(null);
 
+      // Separate cache key so the admin (owner-approval) view doesn't
+      // pollute the public cache — same id, different filter semantics.
+      const cacheKey = includeUnpublished
+        ? `course:${courseId}:admin`
+        : `course:${courseId}`;
+
       const data = await cachedFetch(
-        `course:${courseId}`,
+        cacheKey,
         TTL.COURSES,
         async () => {
-          const { data, error: queryError } = await supabase
+          let query = supabase
             .from('courses')
             .select('*, venues(name, city, address, location, slug, theme_colors), course_schedules(date, start_time, end_time, description)')
-            .eq('id', courseId)
-            .eq('is_published', true)
-            .single();
+            .eq('id', courseId);
+
+          if (!includeUnpublished) query = query.eq('is_published', true);
+
+          const { data, error: queryError } = await query.single();
 
           if (queryError) throw queryError;
           return data as CourseWithVenue;
@@ -49,7 +71,7 @@ export function useCourseDetails(courseId: string | undefined) {
     } finally {
       setLoading(false);
     }
-  }, [courseId]);
+  }, [courseId, includeUnpublished]);
 
   useEffect(() => { fetchCourse(); }, [fetchCourse]);
 

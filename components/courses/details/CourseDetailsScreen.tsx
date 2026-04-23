@@ -14,14 +14,35 @@ import CourseLearningSection from './CourseLearningSection';
 import { AddressBox } from '@/components/events/card/AddressBox';
 import CourseBottomBar from './CourseBottomBar';
 import CourseHeaderActions from './CourseHeaderActions';
+import CourseApprovalHeaderActions from './CourseApprovalHeaderActions';
+
+type CourseDetailsMode = 'public' | 'approval';
 
 type Props = {
   courseId: string | undefined;
+  /**
+   * `public` (default) — standard viewer UI with share/calendar header.
+   * `approval` — venue-owner approval UI: swap header for V/X buttons and
+   * fetch unpublished rows so pending courses are visible.
+   */
+  mode?: CourseDetailsMode;
+  onApprove?: () => void;
+  onReject?: () => void;
+  approvalLoading?: boolean;
 };
 
-export default function CourseDetailsScreen({ courseId }: Props) {
+export default function CourseDetailsScreen({
+  courseId,
+  mode = 'public',
+  onApprove,
+  onReject,
+  approvalLoading,
+}: Props) {
   const navigation = useNavigation();
-  const { course, loading, error } = useCourseDetails(courseId);
+  const isApproval = mode === 'approval';
+  const { course, loading, error } = useCourseDetails(courseId, {
+    includeUnpublished: isApproval,
+  });
   const [calendarLoading, setCalendarLoading] = useState(false);
 
   const handleShare = useCallback(() => {
@@ -75,16 +96,33 @@ export default function CourseDetailsScreen({ courseId }: Props) {
   useEffect(() => {
     if (!course) return;
     navigation.setOptions({
-      headerLeft: () => (
-        <CourseHeaderActions
-          onShare={handleShare}
-          onAddToCalendar={handleAddToCalendar}
-          calendarLoading={calendarLoading}
-          calendarDisabled={course.course_schedules.length === 0}
-        />
-      ),
+      headerLeft: () =>
+        isApproval ? (
+          <CourseApprovalHeaderActions
+            onApprove={() => onApprove?.()}
+            onReject={() => onReject?.()}
+            loading={approvalLoading}
+          />
+        ) : (
+          <CourseHeaderActions
+            onShare={handleShare}
+            onAddToCalendar={handleAddToCalendar}
+            calendarLoading={calendarLoading}
+            calendarDisabled={course.course_schedules.length === 0}
+          />
+        ),
     });
-  }, [course, navigation, handleShare, handleAddToCalendar, calendarLoading]);
+  }, [
+    course,
+    navigation,
+    handleShare,
+    handleAddToCalendar,
+    calendarLoading,
+    isApproval,
+    onApprove,
+    onReject,
+    approvalLoading,
+  ]);
 
   if (loading) {
     return (

@@ -15,7 +15,7 @@ type ApprovalInboxSectionProps = {
  * model, so the section visibly calls out the approval gate.
  */
 export default function ApprovalInboxSection({ venueId }: ApprovalInboxSectionProps) {
-  const { pending, rejected, approve, reject, loading } = useCourseApprovalQueue(venueId);
+  const { pending, rejected, loading } = useCourseApprovalQueue(venueId);
 
   if (loading) return null;
   if (pending.length === 0 && rejected.length === 0) return null;
@@ -31,12 +31,7 @@ export default function ApprovalInboxSection({ venueId }: ApprovalInboxSectionPr
         <View style={styles.group}>
           <Text style={styles.groupTitle}>ממתינים ({pending.length})</Text>
           {pending.map((course) => (
-            <ApprovalRow
-              key={course.id}
-              course={course}
-              onApprove={approve}
-              onReject={reject}
-            />
+            <ApprovalRow key={course.id} course={course} />
           ))}
         </View>
       )}
@@ -45,12 +40,7 @@ export default function ApprovalInboxSection({ venueId }: ApprovalInboxSectionPr
         <View style={styles.group}>
           <Text style={styles.groupTitle}>נדחו</Text>
           {rejected.map((course) => (
-            <ApprovalRow
-              key={course.id}
-              course={course}
-              onApprove={approve}
-              onReject={reject}
-            />
+            <ApprovalRow key={course.id} course={course} />
           ))}
         </View>
       )}
@@ -77,7 +67,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   group: {
-    marginTop: 8,
+    marginTop: 4,
   },
   groupTitle: {
     color: Colors.textSecondary,

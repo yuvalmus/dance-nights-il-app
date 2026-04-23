@@ -1,63 +1,46 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import { PendingCourse } from '@/hooks/useCourseApprovalQueue';
 
 type ApprovalRowProps = {
   course: PendingCourse;
-  onApprove: (id: string) => Promise<void>;
-  onReject: (id: string) => Promise<void>;
 };
 
-export default function ApprovalRow({ course, onApprove, onReject }: ApprovalRowProps) {
+/**
+ * Single-tap row that opens the course approval screen. Approve/reject
+ * actions live on that detail screen — we deliberately don't surface them
+ * here so the owner always sees what they're deciding on.
+ */
+export default function ApprovalRow({ course }: ApprovalRowProps) {
+  const router = useRouter();
   const creator = course.profiles?.display_name ?? 'אמן';
   const isRejected = course.approval_status === 'rejected';
 
-  const confirmReject = () => {
-    Alert.alert(
-      'לדחות את הקורס?',
-      `הקורס "${course.title}" לא יפורסם תחת המקום שלך עד אישור עתידי.`,
-      [
-        { text: 'ביטול', style: 'cancel' },
-        {
-          text: 'דחייה',
-          style: 'destructive',
-          onPress: () => { void onReject(course.id); },
-        },
-      ],
-    );
+  const openDetails = () => {
+    router.push({ pathname: '/course/approve', params: { courseId: course.id } });
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={openDetails}
+      activeOpacity={0.7}
+    >
       <View style={styles.info}>
-        <Text style={styles.title}>{course.title}</Text>
-        <Text style={styles.meta}>
+        <Text style={styles.title} numberOfLines={1}>{course.title}</Text>
+        <Text style={styles.meta} numberOfLines={1}>
           {creator}
           {course.dance_style ? ` • ${course.dance_style}` : ''}
         </Text>
         {isRejected && <Text style={styles.rejected}>נדחה</Text>}
       </View>
 
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={[styles.btn, styles.approveBtn]}
-          onPress={() => { void onApprove(course.id); }}
-        >
-          <Ionicons name="checkmark" size={16} color={Colors.background} />
-          <Text style={styles.approveText}>אישור</Text>
-        </TouchableOpacity>
-
-        {!isRejected && (
-          <TouchableOpacity
-            style={[styles.btn, styles.rejectBtn]}
-            onPress={confirmReject}
-          >
-            <Ionicons name="close" size={16} color={Colors.error} />
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
+      {/* Chevron points "into" the screen (RTL: left) — a familiar
+          "tap to drill in" affordance used across iOS list rows. */}
+      <Ionicons name="chevron-back" size={18} color={Colors.textMuted} />
+    </TouchableOpacity>
   );
 }
 
@@ -89,31 +72,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
-  },
-  actions: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: 6,
-  },
-  btn: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  approveBtn: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  approveText: {
-    color: Colors.background,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  rejectBtn: {
-    borderColor: Colors.error,
   },
 });
