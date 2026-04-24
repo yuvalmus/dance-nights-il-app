@@ -25,12 +25,12 @@ export async function setCourseApproval(
   if (error) throw error;
 
   // Refresh any cached course data — the public listing, per-course detail,
-  // the owner-facing admin detail, and the approval inbox all depend on
-  // approval_status.
+  // the approval inbox, and the owner/artist "my courses" section all
+  // depend on approval_status.
   invalidateByPrefix('courses:');
   invalidateByPrefix('course-approval:');
+  invalidateByPrefix('my-courses:');
   invalidate(`course:${courseId}`);
-  invalidate(`course:${courseId}:admin`);
 }
 
 export const approveCourse = (id: string) => setCourseApproval(id, 'approved');

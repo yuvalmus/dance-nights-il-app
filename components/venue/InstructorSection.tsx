@@ -13,7 +13,8 @@ type InstructorSectionProps = {
 
 /**
  * Owner's view of instructors at their venue — active, pending, invite flow.
- * Kept narrow: lifecycle lives in the hook, rendering here.
+ * Top-level card on the profile screen; lifecycle lives in the hook,
+ * rendering here.
  */
 export default function InstructorSection({ venueId }: InstructorSectionProps) {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ export default function InstructorSection({ venueId }: InstructorSectionProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="people-outline" size={18} color={Colors.primary} />
+        <Ionicons name="people-outline" size={22} color={Colors.primary} />
         <Text style={styles.title}>מדריכים שייכים למקום</Text>
       </View>
 
@@ -66,20 +67,22 @@ export default function InstructorSection({ venueId }: InstructorSectionProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
   },
   header: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 12,
   },
   title: {
     color: Colors.text,
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
   },
   empty: {

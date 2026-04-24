@@ -4,28 +4,19 @@ import { cachedFetch, TTL } from '@/lib/cache';
 import { isValidCourseId } from '@/lib/courseShare';
 import { CourseWithVenue } from './useCourses';
 
-type UseCourseDetailsOptions = {
-  /**
-   * Include unpublished courses — used by the venue owner's approval flow
-   * where the course hasn't been published yet. RLS still gates visibility,
-   * so random callers can't bypass publish state via this flag.
-   */
-  includeUnpublished?: boolean;
-};
-
 /**
  * Fetches a single course by ID.
- * Tries the shared courses cache first, falls back to a dedicated per-course fetch.
+ *
+ * Deliberately does NOT filter by `is_published` — RLS is the source of
+ * truth for who can see what (owners / creators / instructors can read
+ * unpublished rows, everyone else only published ones), so re-imposing the
+ * filter client-side just blocks legitimate self-access (e.g. an artist
+ * opening their own draft via a share link).
  */
-export function useCourseDetails(
-  courseId: string | undefined,
-  options?: UseCourseDetailsOptions,
-) {
+export function useCourseDetails(courseId: string | undefined) {
   const [course, setCourse] = useState<CourseWithVenue | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const includeUnpublished = options?.includeUnpublished ?? false;
 
   const fetchCourse = useCallback(async () => {
     if (!courseId) return;
@@ -40,24 +31,15 @@ export function useCourseDetails(
       setLoading(true);
       setError(null);
 
-      // Separate cache key so the admin (owner-approval) view doesn't
-      // pollute the public cache — same id, different filter semantics.
-      const cacheKey = includeUnpublished
-        ? `course:${courseId}:admin`
-        : `course:${courseId}`;
-
       const data = await cachedFetch(
-        cacheKey,
+        `course:${courseId}`,
         TTL.COURSES,
         async () => {
-          let query = supabase
+          const { data, error: queryError } = await supabase
             .from('courses')
             .select('*, venues(name, city, address, location, slug, theme_colors), course_schedules(date, start_time, end_time, description)')
-            .eq('id', courseId);
-
-          if (!includeUnpublished) query = query.eq('is_published', true);
-
-          const { data, error: queryError } = await query.single();
+            .eq('id', courseId)
+            .single();
 
           if (queryError) throw queryError;
           return data as CourseWithVenue;
@@ -71,7 +53,7 @@ export function useCourseDetails(
     } finally {
       setLoading(false);
     }
-  }, [courseId, includeUnpublished]);
+  }, [courseId]);
 
   useEffect(() => { fetchCourse(); }, [fetchCourse]);
 

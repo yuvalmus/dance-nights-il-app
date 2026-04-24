@@ -22,8 +22,7 @@ type Props = {
   courseId: string | undefined;
   /**
    * `public` (default) — standard viewer UI with share/calendar header.
-   * `approval` — venue-owner approval UI: swap header for V/X buttons and
-   * fetch unpublished rows so pending courses are visible.
+   * `approval` — venue-owner approval UI: swap header for V/X buttons.
    */
   mode?: CourseDetailsMode;
   onApprove?: () => void;
@@ -40,9 +39,7 @@ export default function CourseDetailsScreen({
 }: Props) {
   const navigation = useNavigation();
   const isApproval = mode === 'approval';
-  const { course, loading, error } = useCourseDetails(courseId, {
-    includeUnpublished: isApproval,
-  });
+  const { course, loading, error } = useCourseDetails(courseId);
   const [calendarLoading, setCalendarLoading] = useState(false);
 
   const handleShare = useCallback(() => {

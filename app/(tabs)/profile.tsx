@@ -8,6 +8,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS, DanceLevel } from '@/constants/config';
 import { useVenue } from '@/hooks/useVenue';
 import MyVenueSection from '@/components/venue/MyVenueSection';
+import InstructorSection from '@/components/venue/InstructorSection';
+import MyCoursesSection from '@/components/courses/MyCoursesSection';
 import PillSelect from '@/components/ui/PillSelect';
 import AffiliationsSection from '@/components/profile/AffiliationsSection';
 import NotificationsSection from '@/components/profile/NotificationsSection';
@@ -76,7 +78,7 @@ export default function ProfileScreen() {
         {/* Notifications */}
         <NotificationsSection />
 
-        {/* Venue owner section */}
+        {/* Venue events (owner) */}
         {venue && (
           <MyVenueSection
             venue={venue}
@@ -85,6 +87,14 @@ export default function ProfileScreen() {
             onDelete={deleteEvent}
           />
         )}
+
+        {/* Courses — shared across venue-owners (venue-hosted) and
+            artists (created / instructed). The section self-hides for
+            unrelated dancers (no venue, no authored/instructed courses). */}
+        <MyCoursesSection venueId={venue?.id} />
+
+        {/* Venue instructors (owner) */}
+        {venue && <InstructorSection venueId={venue.id} />}
 
         {/* Venue affiliations (instructor perspective) */}
         <AffiliationsSection />
