@@ -15,6 +15,7 @@ import FormSection from '@/components/ui/FormSection';
 import FormToggle from '@/components/ui/FormToggle';
 import PillSelect from '@/components/ui/PillSelect';
 import ActionButton from '@/components/ui/ActionButton';
+import { formatDateKey, parseDateKey } from '@/lib/date';
 
 import { EventFormProps } from './types';
 import { useEventForm } from './useEventForm';
@@ -62,7 +63,7 @@ export default function EventForm({
   };
 
   // Date helpers
-  const dateObj = new Date(form.date + 'T00:00:00');
+  const dateObj = parseDateKey(form.date);
   const dateDisplay = dateObj.toLocaleDateString('he-IL', {
     weekday: 'long',
     day: 'numeric',
@@ -110,15 +111,15 @@ export default function EventForm({
           <DateTimePicker
             value={dateObj}
             mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            minimumDate={new Date()}
+            minimumDate={parseDateKey(undefined)}
             onChange={(_, selectedDate) => {
               setShowDatePicker(Platform.OS === 'ios');
               if (selectedDate) {
-                update('date', selectedDate.toISOString().split('T')[0]);
+                update('date', formatDateKey(selectedDate));
               }
             }}
             themeVariant="dark"
+            style={styles.datePicker}
           />
         )}
       </FormSection>
@@ -229,6 +230,10 @@ const styles = StyleSheet.create({
   dateTextActive: {
     color: Colors.primary,
     fontWeight: '600',
+  },
+  datePicker: {
+    alignSelf: 'center',
+    marginBottom: 12,
   },
   dateText: {
     color: Colors.text,

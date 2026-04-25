@@ -10,6 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import FormInput from '@/components/ui/FormInput';
+import { formatDateKey, parseDateKey } from '@/lib/date';
 import { CourseScheduleForm } from './types';
 
 type Props = {
@@ -22,10 +23,6 @@ type Props = {
 
 type PickerField = 'date' | 'start_time' | 'end_time';
 type ActivePicker = null | { index: number; field: PickerField };
-
-function parseDateISO(d: string): Date {
-  return new Date((d || new Date().toISOString().split('T')[0]) + 'T00:00:00');
-}
 
 function parseTime(t: string): Date {
   const [h, m] = (t || '20:00').split(':').map(Number);
@@ -40,7 +37,7 @@ function formatTime(d: Date): string {
 
 function formatDateDisplay(dateStr: string): string {
   if (!dateStr) return 'בחר תאריך';
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('he-IL', {
+  return parseDateKey(dateStr).toLocaleDateString('he-IL', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -73,7 +70,7 @@ export default function ScheduleSection({
     if (Platform.OS !== 'ios') closePicker();
     if (!selected) return;
     if (field === 'date') {
-      onUpdate(index, 'date', selected.toISOString().split('T')[0]);
+      onUpdate(index, 'date', formatDateKey(selected));
     } else {
       onUpdate(index, field, formatTime(selected));
     }
@@ -144,11 +141,12 @@ export default function ScheduleSection({
 
                   {isActiveField('date') && (
                     <DateTimePicker
-                      value={parseDateISO(entry.date)}
+                      value={parseDateKey(entry.date)}
                       mode="date"
-                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      minimumDate={parseDateKey(undefined)}
                       onChange={(_, d) => onPickerChange(index, 'date', d)}
                       themeVariant="dark"
+                      style={styles.picker}
                     />
                   )}
 
@@ -186,9 +184,9 @@ export default function ScheduleSection({
                           value={parseTime(entry.start_time)}
                           mode="time"
                           is24Hour
-                          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                           onChange={(_, d) => onPickerChange(index, 'start_time', d)}
                           themeVariant="dark"
+                          style={styles.picker}
                         />
                       )}
                     </View>
@@ -225,9 +223,9 @@ export default function ScheduleSection({
                           value={parseTime(entry.end_time)}
                           mode="time"
                           is24Hour
-                          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                           onChange={(_, d) => onPickerChange(index, 'end_time', d)}
                           themeVariant="dark"
+                          style={styles.picker}
                         />
                       )}
                     </View>
@@ -327,6 +325,10 @@ const styles = StyleSheet.create({
   pickerTextActive: {
     color: Colors.primary,
     fontWeight: '600',
+  },
+  picker: {
+    alignSelf: 'center',
+    marginBottom: 12,
   },
   timeRow: {
     flexDirection: 'row-reverse',
