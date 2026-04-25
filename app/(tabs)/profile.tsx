@@ -91,7 +91,10 @@ export default function ProfileScreen() {
         {/* Courses — shared across venue-owners (venue-hosted) and
             artists (created / instructed). The section self-hides for
             unrelated dancers (no venue, no authored/instructed courses). */}
-        <MyCoursesSection venueId={venue?.id} />
+        <MyCoursesSection
+          venueId={venue?.id}
+          canCreate={!!venue || !!profile?.is_artist}
+        />
 
         {/* Venue instructors (owner) */}
         {venue && <InstructorSection venueId={venue.id} />}

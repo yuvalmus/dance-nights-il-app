@@ -7,8 +7,8 @@ import { formatTime } from '@/lib/date';
 
 type VenueEventRowProps = {
   event: EventWithSchedules;
-  onTogglePublish: (eventId: string, isPublished: boolean) => Promise<void>;
-  onDelete: (eventId: string) => Promise<void>;
+  onTogglePublish?: (eventId: string, isPublished: boolean) => Promise<void>;
+  onDelete?: (eventId: string) => Promise<void>;
 };
 
 function formatDate(dateStr: string): string {
@@ -58,14 +58,14 @@ export default function VenueEventRow({ event, onTogglePublish, onDelete }: Venu
         {
           text: 'מחק',
           style: 'destructive',
-          onPress: () => onDelete(event.id),
+          onPress: onDelete && (() => onDelete(event.id)),
         },
       ],
     );
   };
 
   const handleTogglePublish = () => {
-    onTogglePublish(event.id, event.is_published);
+    onTogglePublish && onTogglePublish(event.id, event.is_published);
   };
 
   return (
@@ -79,12 +79,14 @@ export default function VenueEventRow({ event, onTogglePublish, onDelete }: Venu
           <Text style={[styles.date, isPast && styles.textPast]}>
             {formatDate(event.date)}
           </Text>
-          <View style={styles.statusGroup}>
-            <View style={[styles.dot, event.is_published ? styles.dotPublished : styles.dotHidden]} />
-            <Text style={styles.status}>
-              {event.is_published ? 'מפורסם' : 'מוסתר'}
-            </Text>
-          </View>
+          {onTogglePublish && (
+            <View style={styles.statusGroup}>
+              <View style={[styles.dot, event.is_published ? styles.dotPublished : styles.dotHidden]} />
+              <Text style={styles.status}>
+                {event.is_published ? 'מפורסם' : 'מוסתר'}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -96,16 +98,20 @@ export default function VenueEventRow({ event, onTogglePublish, onDelete }: Venu
         <TouchableOpacity onPress={handleDuplicate} hitSlop={8} style={styles.actionBtn}>
           <Ionicons name="copy-outline" size={16} color={Colors.textSecondary} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleTogglePublish} hitSlop={8} style={styles.actionBtn}>
+        {onTogglePublish && (
+          <TouchableOpacity onPress={handleTogglePublish} hitSlop={8} style={styles.actionBtn}>
           <Ionicons
             name={event.is_published ? 'eye' : 'eye-off'}
             size={16}
             color={event.is_published ? Colors.success : Colors.textMuted}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleDelete} hitSlop={8} style={styles.actionBtn}>
+        )}
+        {onDelete && (
+          <TouchableOpacity onPress={handleDelete} hitSlop={8} style={styles.actionBtn}>
           <Ionicons name="trash-outline" size={16} color={Colors.error} />
         </TouchableOpacity>
+        )}
       </View>
     </View>
   );

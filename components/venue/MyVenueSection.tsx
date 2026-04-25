@@ -66,8 +66,6 @@ export default function MyVenueSection({
             <VenueEventRow
               key={event.id}
               event={event}
-              onTogglePublish={onTogglePublish}
-              onDelete={onDelete}
             />
           ))}
         </View>

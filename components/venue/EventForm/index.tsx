@@ -19,7 +19,7 @@ import ActionButton from '@/components/ui/ActionButton';
 import { EventFormProps } from './types';
 import { useEventForm } from './useEventForm';
 import ScheduleSection from './ScheduleSection';
-import PosterSection from './PosterSection';
+import FormPosterSection from '@/components/ui/FormPosterSection';
 import DetailsSection from './DetailsSection';
 import RegistrationSection from './RegistrationSection';
 
@@ -145,7 +145,7 @@ export default function EventForm({
       />
 
       {/* Poster */}
-      <PosterSection
+      <FormPosterSection
         posterUri={form.posterUri}
         onPickImage={handlePickImage}
         onRemovePoster={handleRemovePoster}
