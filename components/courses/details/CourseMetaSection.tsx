@@ -9,9 +9,11 @@ import { getVenueLogo } from '@/constants/venueLogos';
 
 type Props = {
   course: CourseWithVenue;
+  /** When set, render a small "by <name>" line under the instructor row. */
+  creatorLabel?: string | null;
 };
 
-export default function CourseMetaSection({ course }: Props) {
+export default function CourseMetaSection({ course, creatorLabel }: Props) {
   const scheduleDates = course.course_schedules.map((s) => s.date).sort();
   const startDate = scheduleDates.length > 0
     ? formatCourseDateRange([scheduleDates[0]])
@@ -30,6 +32,12 @@ export default function CourseMetaSection({ course }: Props) {
           <Ionicons name="person" size={16} color={Colors.primary} />
           <Text style={styles.instructorText}>{course.instructor}</Text>
         </View>
+      )}
+
+      {/* Creator attribution — shown when the viewer is the venue owner
+          looking at a course someone else created at their venue. */}
+      {creatorLabel && (
+        <Text style={styles.creatorLine}>פורסם ע״י {creatorLabel}</Text>
       )}
 
       {/* Description */}
@@ -89,6 +97,12 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontSize: 18,
     fontWeight: '800',
+  },
+  creatorLine: {
+    color: Colors.textMuted,
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: -10,
   },
   description: {
     color: Colors.textSecondary,

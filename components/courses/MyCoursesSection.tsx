@@ -33,7 +33,7 @@ const PAST_LIMIT = 5;
 export default function MyCoursesSection({ venueId, canCreate = false }: Props) {
   const { user } = useAuth();
   const router = useRouter();
-  const { upcoming, past, pending, loading } = useMyCourses({
+  const { upcoming, past, pending, loading, togglePublish, deleteCourse } = useMyCourses({
     userId: user?.id,
     venueId,
   });
@@ -80,10 +80,16 @@ export default function MyCoursesSection({ venueId, canCreate = false }: Props) 
       {pending.length > 0 && (
         <View style={styles.group}>
           <Text style={styles.groupTitle}>
-            ממתינים לאישור ({pending.length})
+            ממתינים / נדחו ({pending.length})
           </Text>
           {pending.map((c) => (
-            <MyCourseRow key={c.id} course={c} ownedVenueId={venueId} />
+            <MyCourseRow
+              key={c.id}
+              course={c}
+              ownedVenueId={venueId}
+              onTogglePublish={togglePublish}
+              onDelete={deleteCourse}
+            />
           ))}
         </View>
       )}
@@ -92,7 +98,13 @@ export default function MyCoursesSection({ venueId, canCreate = false }: Props) 
         <View style={styles.group}>
           <Text style={styles.groupTitle}>קורסים קרובים</Text>
           {upcoming.map((c) => (
-            <MyCourseRow key={c.id} course={c} ownedVenueId={venueId} />
+            <MyCourseRow
+              key={c.id}
+              course={c}
+              ownedVenueId={venueId}
+              onTogglePublish={togglePublish}
+              onDelete={deleteCourse}
+            />
           ))}
         </View>
       )}
@@ -101,7 +113,13 @@ export default function MyCoursesSection({ venueId, canCreate = false }: Props) 
         <View style={styles.group}>
           <Text style={styles.groupTitle}>קורסים שעברו</Text>
           {past.slice(0, PAST_LIMIT).map((c) => (
-            <MyCourseRow key={c.id} course={c} ownedVenueId={venueId} />
+            <MyCourseRow
+              key={c.id}
+              course={c}
+              ownedVenueId={venueId}
+              onTogglePublish={togglePublish}
+              onDelete={deleteCourse}
+            />
           ))}
         </View>
       )}
