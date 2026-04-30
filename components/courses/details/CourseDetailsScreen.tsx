@@ -1,11 +1,13 @@
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigation } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigation, useRouter } from 'expo-router';
 import { Colors } from '@/constants/colors';
+import { useAuth } from '@/lib/auth';
 import { useCourseDetails } from '@/hooks/useCourseDetails';
 import { openNavigation } from '@/lib/navigation';
 import { shareCourseLink } from '@/lib/courseShare';
 import { addCourseSchedulesToCalendar } from '@/lib/courseCalendar';
+import { deleteCourse, setCoursePublish } from '@/lib/courseService';
 import CourseHeroPoster from './CourseHeroPoster';
 import CourseMetaSection from './CourseMetaSection';
 import CourseStructureAccordion from './CourseStructureAccordion';
@@ -14,15 +16,105 @@ import CourseLearningSection from './CourseLearningSection';
 import { AddressBox } from '@/components/events/card/AddressBox';
 import CourseBottomBar from './CourseBottomBar';
 import CourseHeaderActions from './CourseHeaderActions';
+import CourseApprovalHeaderActions from './CourseApprovalHeaderActions';
+
+type CourseDetailsMode = 'public' | 'approval';
 
 type Props = {
   courseId: string | undefined;
+  /**
+   * `public` (default) — standard viewer UI with share/calendar header.
+   * `approval` — venue-owner approval UI: swap header for V/X buttons.
+   */
+  mode?: CourseDetailsMode;
+  onApprove?: () => void;
+  onReject?: () => void;
+  approvalLoading?: boolean;
 };
 
-export default function CourseDetailsScreen({ courseId }: Props) {
+export default function CourseDetailsScreen({
+  courseId,
+  mode = 'public',
+  onApprove,
+  onReject,
+  approvalLoading,
+}: Props) {
   const navigation = useNavigation();
-  const { course, loading, error } = useCourseDetails(courseId);
+  const router = useRouter();
+  const { user } = useAuth();
+  const isApproval = mode === 'approval';
+  const { course, loading, error, mutate } = useCourseDetails(courseId);
   const [calendarLoading, setCalendarLoading] = useState(false);
+
+  const isCreator = !!user && !!course && course.created_by === user.id;
+  const isVenueOwner =
+    !!user && !!course?.venues && course.venues.owner_id === user.id;
+  const isPending = course?.approval_status === 'pending_owner_review';
+  const isRejected = course?.approval_status === 'rejected';
+  // A course is "live" — visible to anyone outside the creator/owner — only
+  // when it's both published AND past the approval gate. Anything else is
+  // a draft, no point offering share/calendar shortcuts on it.
+  const isLive =
+    !!course && course.is_published && !isPending && !isRejected;
+
+  // Show creator name when a venue owner is viewing a course someone else
+  // created at their venue. Self-authored rows skip the line — redundant.
+  const creatorLabel = useMemo(() => {
+    if (!course || !isVenueOwner || isCreator) return null;
+    return course.creator_display_name ?? null;
+  }, [course, isVenueOwner, isCreator]);
+
+  const handleEdit = useCallback(() => {
+    if (!course) return;
+    router.push({ pathname: '/course/edit', params: { courseId: course.id } });
+  }, [course, router]);
+
+  const handleTogglePublish = useCallback(() => {
+    if (!course) return;
+    const next = !course.is_published;
+    Alert.alert(
+      next ? 'פרסום קורס' : 'הסתרת קורס',
+      next ? 'הקורס יוצג ברשימה הציבורית.' : 'הקורס יוסתר מהרשימה הציבורית.',
+      [
+        { text: 'ביטול', style: 'cancel' },
+        {
+          text: next ? 'פרסם' : 'הסתר',
+          onPress: async () => {
+            try {
+              await setCoursePublish(course.id, next);
+              // In-place patch — no refetch, no spinner, no remount.
+              mutate({ is_published: next });
+            } catch {
+              Alert.alert('שגיאה', 'לא הצלחנו לעדכן את סטטוס הפרסום.');
+            }
+          },
+        },
+      ],
+    );
+  }, [course, mutate]);
+
+  const handleDelete = useCallback(() => {
+    if (!course) return;
+    Alert.alert(
+      'מחיקת קורס',
+      `למחוק את "${course.title}"?`,
+      [
+        { text: 'ביטול', style: 'cancel' },
+        {
+          text: 'מחק',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteCourse(course.id);
+              router.back();
+            } catch {
+              Alert.alert('שגיאה', 'לא הצלחנו למחוק את הקורס.');
+            }
+          },
+        },
+      ],
+    );
+  }, [course, router]);
 
   const handleShare = useCallback(() => {
     if (!course) return;
@@ -75,16 +167,48 @@ export default function CourseDetailsScreen({ courseId }: Props) {
   useEffect(() => {
     if (!course) return;
     navigation.setOptions({
-      headerLeft: () => (
-        <CourseHeaderActions
-          onShare={handleShare}
-          onAddToCalendar={handleAddToCalendar}
-          calendarLoading={calendarLoading}
-          calendarDisabled={course.course_schedules.length === 0}
-        />
-      ),
+      headerLeft: () =>
+        isApproval ? (
+          <CourseApprovalHeaderActions
+            onApprove={() => onApprove?.()}
+            onReject={() => onReject?.()}
+            loading={approvalLoading}
+          />
+        ) : (
+          <CourseHeaderActions
+            onShare={isLive ? handleShare : undefined}
+            onAddToCalendar={isLive ? handleAddToCalendar : undefined}
+            calendarLoading={calendarLoading}
+            calendarDisabled={course.course_schedules.length === 0}
+            onEdit={isCreator && !isPending ? handleEdit : undefined}
+            onTogglePublish={
+              isCreator && !isPending && !isRejected
+                ? handleTogglePublish
+                : undefined
+            }
+            isPublished={course.is_published}
+            onDelete={isCreator ? handleDelete : undefined}
+          />
+        ),
     });
-  }, [course, navigation, handleShare, handleAddToCalendar, calendarLoading]);
+  }, [
+    course,
+    navigation,
+    handleShare,
+    handleAddToCalendar,
+    calendarLoading,
+    isApproval,
+    onApprove,
+    onReject,
+    approvalLoading,
+    isCreator,
+    isPending,
+    isRejected,
+    isLive,
+    handleEdit,
+    handleTogglePublish,
+    handleDelete,
+  ]);
 
   if (loading) {
     return (
@@ -125,7 +249,7 @@ export default function CourseDetailsScreen({ courseId }: Props) {
         <CourseHeroPoster posterUrl={course.poster_url} title={course.title} />
 
         {/* 2. Description + light info blocks (date, time, level) */}
-        <CourseMetaSection course={course} />
+        <CourseMetaSection course={course} creatorLabel={creatorLabel} />
 
         {/* 3. Course structure accordion */}
         <CourseStructureAccordion

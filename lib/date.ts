@@ -17,6 +17,24 @@ export function formatDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/**
+ * Parse a YYYY-MM-DD key as a local-time Date at midnight.
+ * Falls back to today when the key is empty.
+ *
+ * Use this (not `new Date(key)`) when feeding a date string into
+ * DateTimePicker — `new Date("2026-05-12")` parses as UTC midnight,
+ * which renders as the previous day in negative-offset timezones and
+ * round-trips incorrectly through `toISOString()`.
+ */
+export function parseDateKey(key: string | undefined | null): Date {
+  if (key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  }
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 /** Format a time string (e.g. "20:00:00") as HH:mm, dropping seconds. */
 export function formatTime(time: string): string {
   const [hours, minutes] = time.split(':');

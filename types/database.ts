@@ -122,6 +122,7 @@ export interface Database {
           dance_styles: string[];
           favorite_venues: string[];
           expo_push_token: string | null;
+          is_artist: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -132,6 +133,9 @@ export interface Database {
           dance_styles?: string[];
           favorite_venues?: string[];
           expo_push_token?: string | null;
+          // is_artist is server-controlled — column UPDATE revoked from
+          // authenticated/anon roles; kept out of Insert/Update to stop the
+          // app from ever trying to write it.
         };
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
         Relationships: [
@@ -246,9 +250,19 @@ export interface Database {
           announcements: string[];
           learning_outcomes: string[];
           created_by: string | null;
+          approval_status: CourseApprovalStatus;
+          approved_by: string | null;
+          approved_at: string | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['courses']['Row'], 'id' | 'created_at' | 'spots_taken'> & {
+        // approval_* columns are server-controlled: the insert trigger sets
+        // them based on venue ownership, and the set_course_approval RPC is
+        // the only path for owner-driven transitions. We omit them from the
+        // Insert/Update shapes so the app can never try to write them.
+        Insert: Omit<
+          Database['public']['Tables']['courses']['Row'],
+          'id' | 'created_at' | 'spots_taken' | 'approval_status' | 'approved_by' | 'approved_at'
+        > & {
           id?: string;
           created_at?: string;
           spots_taken?: number;
@@ -301,6 +315,86 @@ export interface Database {
           },
         ];
       };
+      venue_affiliations: {
+        Row: {
+          id: string;
+          venue_id: string;
+          user_id: string;
+          status: AffiliationStatus;
+          invited_by: string;
+          invited_at: string;
+          responded_at: string | null;
+          revoked_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        // Only the INSERT shape the client actually needs: the owner invites
+        // a user. Timestamps and status transitions are handled by triggers
+        // and the RLS matrix.
+        Insert: {
+          id?: string;
+          venue_id: string;
+          user_id: string;
+          status?: AffiliationStatus;
+          invited_by: string;
+          invited_at?: string;
+          responded_at?: string | null;
+          revoked_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['venue_affiliations']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'venue_affiliations_venue_id_fkey';
+            columns: ['venue_id'];
+            isOneToOne: false;
+            referencedRelation: 'venues';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'venue_affiliations_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'venue_affiliations_invited_by_fkey';
+            columns: ['invited_by'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: NotificationType;
+          title: string;
+          body: string | null;
+          data: Json;
+          read_at: string | null;
+          created_at: string;
+        };
+        // Clients never INSERT — triggers own writes. Shape exists for
+        // completeness only.
+        Insert: never;
+        Update: {
+          read_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -312,11 +406,42 @@ export interface Database {
         };
         Returns: EventWithVenue[];
       };
+      set_course_approval: {
+        Args: {
+          target_course_id: string;
+          new_status: Exclude<CourseApprovalStatus, 'not_required'>;
+        };
+        Returns: Database['public']['Tables']['courses']['Row'];
+      };
+      search_profiles_for_affiliation: {
+        Args: {
+          query_text?: string;
+          max_results?: number;
+        };
+        Returns: {
+          id: string;
+          display_name: string | null;
+          is_artist: boolean;
+        }[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
 }
+
+export type AffiliationStatus = 'pending' | 'active' | 'revoked';
+export type CourseApprovalStatus =
+  | 'not_required'
+  | 'pending_owner_review'
+  | 'approved'
+  | 'rejected';
+export type NotificationType =
+  | 'instructor_left_venue'
+  | 'instructor_invite'
+  | 'course_pending_approval'
+  | 'course_approved'
+  | 'course_rejected';
 
 // Derived types for app usage
 export type Venue = Database['public']['Tables']['venues']['Row'];
@@ -328,6 +453,8 @@ export type PollOption = Database['public']['Tables']['poll_options']['Row'];
 export type PollVote = Database['public']['Tables']['poll_votes']['Row'];
 export type Course = Database['public']['Tables']['courses']['Row'];
 export type CourseSchedule = Database['public']['Tables']['course_schedules']['Row'];
+export type VenueAffiliation = Database['public']['Tables']['venue_affiliations']['Row'];
+export type Notification = Database['public']['Tables']['notifications']['Row'];
 
 // The shape returned by the get_events_by_date_and_distance RPC
 export type EventWithVenue = {

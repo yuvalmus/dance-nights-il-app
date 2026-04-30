@@ -1,9 +1,4 @@
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@/components/ui/Icon';
 import { Colors } from '@/constants/colors';
 import FormSection from '@/components/ui/FormSection';
@@ -13,11 +8,22 @@ type Props = {
   posterUri: string | null;
   onPickImage: () => void;
   onRemovePoster: () => void;
+  /** Optional title — defaults to "פוסטר" for the common case. */
+  title?: string;
 };
 
-export default function PosterSection({ posterUri, onPickImage, onRemovePoster }: Props) {
+/**
+ * Shared poster picker used by event + course forms. Pure UI: the caller
+ * owns the image-picker call and the form state.
+ */
+export default function FormPosterSection({
+  posterUri,
+  onPickImage,
+  onRemovePoster,
+  title = 'פוסטר',
+}: Props) {
   return (
-    <FormSection title="פוסטר">
+    <FormSection title={title}>
       {posterUri ? (
         <View style={styles.posterPreview}>
           <Image source={{ uri: posterUri }} style={styles.posterImage} />

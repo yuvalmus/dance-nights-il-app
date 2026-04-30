@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { cachedFetch, invalidate, TTL } from '@/lib/cache';
 
 // Only fields the UI needs — excludes expo_push_token, favorite_venues, timestamps
-const PROFILE_SELECT = 'id, display_name, dance_level, dance_styles';
+const PROFILE_SELECT = 'id, display_name, dance_level, dance_styles, is_artist';
 
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);

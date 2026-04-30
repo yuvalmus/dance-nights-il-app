@@ -8,7 +8,11 @@ import { useProfile } from '@/hooks/useProfile';
 import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS, DanceLevel } from '@/constants/config';
 import { useVenue } from '@/hooks/useVenue';
 import MyVenueSection from '@/components/venue/MyVenueSection';
+import InstructorSection from '@/components/venue/InstructorSection';
+import MyCoursesSection from '@/components/courses/MyCoursesSection';
 import PillSelect from '@/components/ui/PillSelect';
+import AffiliationsSection from '@/components/profile/AffiliationsSection';
+import NotificationsSection from '@/components/profile/NotificationsSection';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -62,10 +66,19 @@ export default function ProfileScreen() {
               {profile?.display_name || 'רקדן/ית'}
             </Text>
             <Text style={styles.userEmail}>{user.email}</Text>
+            {profile?.is_artist && (
+              <View style={styles.artistBadge}>
+                <Ionicons name="checkmark-circle" size={14} color={Colors.primary} />
+                <Text style={styles.artistBadgeText}>אמן מאומת</Text>
+              </View>
+            )}
           </View>
         </View>
 
-        {/* Venue owner section */}
+        {/* Notifications */}
+        <NotificationsSection />
+
+        {/* Venue events (owner) */}
         {venue && (
           <MyVenueSection
             venue={venue}
@@ -74,6 +87,20 @@ export default function ProfileScreen() {
             onDelete={deleteEvent}
           />
         )}
+
+        {/* Courses — shared across venue-owners (venue-hosted) and
+            artists (created / instructed). The section self-hides for
+            unrelated dancers (no venue, no authored/instructed courses). */}
+        <MyCoursesSection
+          venueId={venue?.id}
+          canCreate={!!venue || !!profile?.is_artist}
+        />
+
+        {/* Venue instructors (owner) */}
+        {venue && <InstructorSection venueId={venue.id} />}
+
+        {/* Venue affiliations (instructor perspective) */}
+        <AffiliationsSection />
 
         {/* Dance level */}
         <Text style={styles.sectionTitle}>רמת ריקוד</Text>
@@ -145,6 +172,21 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 14,
     marginTop: 2,
+  },
+  artistBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceLight,
+  },
+  artistBadgeText: {
+    color: Colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
   },
   sectionTitle: {
     color: Colors.text,
