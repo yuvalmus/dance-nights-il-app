@@ -7,8 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { useProfile } from '@/hooks/useProfile';
 import { DANCE_STYLES, DANCE_LEVELS, DANCE_STYLE_LABELS, DANCE_LEVEL_LABELS, DanceLevel } from '@/constants/config';
 import { useVenue } from '@/hooks/useVenue';
-import MyVenueSection from '@/components/venue/MyVenueSection';
-import InstructorSection from '@/components/venue/InstructorSection';
+import MyVenueCard from '@/components/venue/MyVenueCard';
 import MyCoursesSection from '@/components/courses/MyCoursesSection';
 import PillSelect from '@/components/ui/PillSelect';
 import AffiliationsSection from '@/components/profile/AffiliationsSection';
@@ -17,7 +16,7 @@ import NotificationsSection from '@/components/profile/NotificationsSection';
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { profile, updateProfile } = useProfile();
-  const { venue, venueEvents, toggleEventPublish, deleteEvent } = useVenue();
+  const { venue } = useVenue();
   const router = useRouter();
 
   if (!user) {
@@ -78,26 +77,17 @@ export default function ProfileScreen() {
         {/* Notifications */}
         <NotificationsSection />
 
-        {/* Venue events (owner) */}
-        {venue && (
-          <MyVenueSection
-            venue={venue}
-            events={venueEvents}
-            onTogglePublish={toggleEventPublish}
-            onDelete={deleteEvent}
-          />
+        {/* Venue owners get a slim entry card → /profile/manage hub.
+            Events / courses / instructors all live inside the manage
+            screen so the profile stays focused on identity. */}
+        {venue && <MyVenueCard venue={venue} />}
+
+        {/* Artists without a venue keep their courses inline — they have
+            only one management surface so a separate screen would be
+            friction without payoff. */}
+        {!venue && (
+          <MyCoursesSection canCreate={!!profile?.is_artist} />
         )}
-
-        {/* Courses — shared across venue-owners (venue-hosted) and
-            artists (created / instructed). The section self-hides for
-            unrelated dancers (no venue, no authored/instructed courses). */}
-        <MyCoursesSection
-          venueId={venue?.id}
-          canCreate={!!venue || !!profile?.is_artist}
-        />
-
-        {/* Venue instructors (owner) */}
-        {venue && <InstructorSection venueId={venue.id} />}
 
         {/* Venue affiliations (instructor perspective) */}
         <AffiliationsSection />
