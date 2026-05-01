@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, ActivityIndicator, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/lib/auth';
 import { useVenue } from '@/hooks/useVenue';
+import { Colors } from '@/constants/colors';
 import { createCourse } from '@/lib/courseService';
 import CourseForm, { CourseFormValues } from '@/components/courses/CourseForm';
 import { VenueCandidate } from '@/hooks/useVenueSearch';
@@ -16,7 +17,7 @@ import { VenueCandidate } from '@/hooks/useVenueSearch';
  */
 export default function AddCourseScreen() {
   const { user } = useAuth();
-  const { venue } = useVenue();
+  const { venue, loading: venueLoading } = useVenue();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -57,6 +58,18 @@ export default function AddCourseScreen() {
       setLoading(false);
     }
   };
+
+  // useCourseForm seeds its state once on mount — wait for the venue lookup
+  // to settle before rendering, otherwise an owner who lands here while the
+  // venue is still loading gets a blank venue field that never recovers.
+  if (venueLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
+        <Stack.Screen options={{ title: 'קורס חדש' }} />
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <>

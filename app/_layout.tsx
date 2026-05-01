@@ -41,6 +41,12 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="profile"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
         <NavigationSheet ref={navigationSheetRef} />
       </AuthProvider>

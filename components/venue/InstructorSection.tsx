@@ -35,7 +35,7 @@ export default function InstructorSection({ venueId }: InstructorSectionProps) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="people-outline" size={22} color={Colors.primary} />
-        <Text style={styles.title}>מדריכים שייכים למקום</Text>
+        <Text style={styles.title}>המדריכים שלי</Text>
       </View>
 
       {active.length === 0 && pending.length === 0 && (
