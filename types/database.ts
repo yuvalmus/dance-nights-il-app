@@ -368,6 +368,75 @@ export interface Database {
           },
         ];
       };
+      registrations: {
+        Row: {
+          id: string;
+          user_id: string;
+          event_id: string | null;
+          course_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          event_id?: string | null;
+          course_id?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['registrations']['Insert']>;
+        Relationships: [
+          {
+            foreignKeyName: 'registrations_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'registrations_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'registrations_course_id_fkey';
+            columns: ['course_id'];
+            isOneToOne: false;
+            referencedRelation: 'courses';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      friendships: {
+        Row: {
+          user_id: string;
+          friend_id: string;
+          status: FriendshipStatus;
+          requested_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        // Clients never INSERT/UPDATE/DELETE directly — use RPCs.
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: 'friendships_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friendships_friend_id_fkey';
+            columns: ['friend_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notifications: {
         Row: {
           id: string;
@@ -424,6 +493,46 @@ export interface Database {
           is_artist: boolean;
         }[];
       };
+      request_friend: {
+        Args: { target_id: string };
+        Returns: void;
+      };
+      accept_friend: {
+        Args: { requester_id: string };
+        Returns: void;
+      };
+      block_user: {
+        Args: { target_id: string };
+        Returns: void;
+      };
+      remove_friendship_record: {
+        Args: { target_id: string };
+        Returns: void;
+      };
+      get_my_friends: {
+        Args: Record<string, never>;
+        Returns: FriendProfile[];
+      };
+      get_pending_friend_requests: {
+        Args: Record<string, never>;
+        Returns: (FriendProfile & { requested_at: string })[];
+      };
+      get_mutual_friends: {
+        Args: { other_user_id: string };
+        Returns: { id: string; display_name: string | null }[];
+      };
+      get_friends_at_activity: {
+        Args: { p_event_id?: string | null; p_course_id?: string | null };
+        Returns: { id: string; display_name: string | null }[];
+      };
+      search_profiles_for_friends: {
+        Args: { query_text?: string; max_results?: number };
+        Returns: (FriendProfile & {
+          pending: boolean;
+          venue_name: string | null;
+          venue_logo_url: string | null;
+        })[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
@@ -436,12 +545,24 @@ export type CourseApprovalStatus =
   | 'pending_owner_review'
   | 'approved'
   | 'rejected';
+export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
 export type NotificationType =
   | 'instructor_left_venue'
   | 'instructor_invite'
   | 'course_pending_approval'
   | 'course_approved'
-  | 'course_rejected';
+  | 'course_rejected'
+  | 'friend_request'
+  | 'friend_accepted'
+  | 'friend_going_event'
+  | 'friend_going_course'
+  | 'event_date_changed';
+
+export type FriendProfile = {
+  id: string;
+  display_name: string | null;
+  is_artist: boolean;
+};
 
 // Derived types for app usage
 export type Venue = Database['public']['Tables']['venues']['Row'];
@@ -454,6 +575,8 @@ export type PollVote = Database['public']['Tables']['poll_votes']['Row'];
 export type Course = Database['public']['Tables']['courses']['Row'];
 export type CourseSchedule = Database['public']['Tables']['course_schedules']['Row'];
 export type VenueAffiliation = Database['public']['Tables']['venue_affiliations']['Row'];
+export type Registration = Database['public']['Tables']['registrations']['Row'];
+export type Friendship = Database['public']['Tables']['friendships']['Row'];
 export type Notification = Database['public']['Tables']['notifications']['Row'];
 
 // The shape returned by the get_events_by_date_and_distance RPC

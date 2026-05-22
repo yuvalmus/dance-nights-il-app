@@ -8,6 +8,10 @@ import { openNavigation } from '@/lib/navigation';
 import { shareCourseLink } from '@/lib/courseShare';
 import { addCourseSchedulesToCalendar } from '@/lib/courseCalendar';
 import { deleteCourse, setCoursePublish } from '@/lib/courseService';
+import { useGoingToggle } from '@/hooks/useGoingToggle';
+import { useFriendsAtActivity } from '@/hooks/useFriendsAtActivity';
+import GoingToggle from '@/components/social/GoingToggle';
+import FriendsGoingStrip from '@/components/social/FriendsGoingStrip';
 import CourseHeroPoster from './CourseHeroPoster';
 import CourseMetaSection from './CourseMetaSection';
 import CourseStructureAccordion from './CourseStructureAccordion';
@@ -45,6 +49,8 @@ export default function CourseDetailsScreen({
   const isApproval = mode === 'approval';
   const { course, loading, error, mutate } = useCourseDetails(courseId);
   const [calendarLoading, setCalendarLoading] = useState(false);
+  const going = useGoingToggle(courseId ? { courseId } : { courseId: '' });
+  const { friends: friendsAtCourse } = useFriendsAtActivity(courseId ? { courseId } : { courseId: '' });
 
   const isCreator = !!user && !!course && course.created_by === user.id;
   const isVenueOwner =
@@ -274,6 +280,18 @@ export default function CourseDetailsScreen({
           </View>
         )}
 
+        {/* 7. Social: going toggle + friends strip */}
+        {courseId && (
+          <View style={styles.socialSection}>
+            <GoingToggle
+              isGoing={going.isGoing}
+              onToggle={going.toggle}
+              loading={going.loading || going.toggling}
+            />
+            <FriendsGoingStrip friends={friendsAtCourse} />
+          </View>
+        )}
+
         {/* Spacer for sticky bottom bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -310,6 +328,10 @@ const styles = StyleSheet.create({
   },
   addressWrap: {
     paddingHorizontal: 20,
+  },
+  socialSection: {
+    paddingHorizontal: 20,
+    gap: 10,
   },
   bottomSpacer: {
     height: 130,

@@ -1,6 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
+import { useGoingToggle } from '@/hooks/useGoingToggle';
+import { useFriendsAtActivity } from '@/hooks/useFriendsAtActivity';
+import GoingToggle from '@/components/social/GoingToggle';
+import FriendsGoingStrip from '@/components/social/FriendsGoingStrip';
 import { ScheduleSection } from './ScheduleSection';
 import { InstructorPills } from './InstructorPills';
 import { AddressBox } from './AddressBox';
@@ -14,6 +18,9 @@ type Props = {
 };
 
 export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: Props) {
+  const { isGoing, loading: goingLoading, toggling, toggle } = useGoingToggle({ eventId: event.event_id });
+  const { friends } = useFriendsAtActivity({ eventId: event.event_id });
+
   return (
     <View style={styles.container}>
       {event.description && (
@@ -45,6 +52,16 @@ export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: 
         priceNote={event.price_note}
         accentColor={accentColor}
       />
+
+      {/* Social: going toggle + friends strip */}
+      <View style={styles.socialSection}>
+        <GoingToggle
+          isGoing={isGoing}
+          onToggle={toggle}
+          loading={goingLoading || toggling}
+        />
+        <FriendsGoingStrip friends={friends} />
+      </View>
     </View>
   );
 }
@@ -63,5 +80,12 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     lineHeight: 21,
     marginBottom: 12,
+  },
+  socialSection: {
+    marginTop: 12,
+    gap: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+    paddingTop: 12,
   },
 });
