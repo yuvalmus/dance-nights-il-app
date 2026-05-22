@@ -15,6 +15,8 @@ type Props = {
   activityId: string;
   /** Activity title — passed to the friends-going screen for its share. */
   activityTitle: string;
+  /** Event date (`YYYY-MM-DD`) — lets the share build an event deep link. */
+  activityDate?: string;
   state: SocialState;
   friends: ActivityFriend[];
   viewerGoing: boolean;
@@ -111,6 +113,7 @@ export default function SocialSection({
   activityType,
   activityId,
   activityTitle,
+  activityDate,
   state,
   friends,
   viewerGoing,
@@ -148,7 +151,12 @@ export default function SocialSection({
   const openFriendsList = () => {
     router.push({
       pathname: '/activity/friends',
-      params: { activityId, activityType, title: activityTitle },
+      params: {
+        activityId,
+        activityType,
+        title: activityTitle,
+        ...(activityDate ? { date: activityDate } : {}),
+      },
     });
   };
 

@@ -2,10 +2,11 @@ import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@/components/ui/Icon";
-import { useNavigation } from "expo-router";
+import { useNavigation, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { useEvents } from "@/hooks/useEvents";
 import { filterEvents } from "@/lib/eventFilters";
+import { isValidEventId, isValidDateKey } from "@/lib/eventShare";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { EventMap, MapRef } from "@/components/map/EventMap";
 import { DateToggle } from "@/components/map/DateToggle";
@@ -18,10 +19,20 @@ const BOUNDARY = isInBoundaryWindow();
 const INITIAL_DATE = BOUNDARY ? getLastNightKey() : getTodayKey();
 
 export default function TonightScreen() {
-  const [selectedDate, setSelectedDate] = useState(INITIAL_DATE);
+  const linkParams = useLocalSearchParams<{ eventId?: string; date?: string }>();
+  // Cold start from an event link: begin on that event's date so the first
+  // useEvents fetch already targets the right list.
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const linkDate = typeof linkParams.date === "string" ? linkParams.date : null;
+    return linkDate && isValidDateKey(linkDate) ? linkDate : INITIAL_DATE;
+  });
   const [danceStyleFilter, setDanceStyleFilter] = useState<string | null>(null);
   const [liveFilter, setLiveFilter] = useState(BOUNDARY);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  // Event id from a deep link, held until that event appears in the loaded
+  // list — then promoted to selectedEventId (centres pin + expands card).
+  const [pendingEventId, setPendingEventId] = useState<string | null>(null);
+  const handledLink = useRef<string | null>(null);
   const sheetRef = useRef<SheetRef>(null);
   const mapRef = useRef<MapRef>(null);
   const navigation = useNavigation();
@@ -58,6 +69,40 @@ export default function TonightScreen() {
       mapRef.current?.centerOn(event.venue_lat, event.venue_lng);
     }
   }, [selectedEventId]);
+
+  // Consume an event deep link (bailando:///?eventId=...&date=...). Fires on
+  // cold start and whenever a fresh link arrives while the app is open.
+  useEffect(() => {
+    const eventId =
+      typeof linkParams.eventId === "string" ? linkParams.eventId : null;
+    if (!eventId || !isValidEventId(eventId)) return;
+
+    // Consume each unique link once — later interaction leaves the URL params
+    // in place and must not re-trigger the jump.
+    const linkKey = `${eventId}|${linkParams.date ?? ""}`;
+    if (handledLink.current === linkKey) return;
+    handledLink.current = linkKey;
+
+    if (typeof linkParams.date === "string" && isValidDateKey(linkParams.date)) {
+      setSelectedDate(linkParams.date);
+    }
+    // Clear filters so a stale filter can't hide the shared event.
+    setDanceStyleFilter(null);
+    setLiveFilter(false);
+    setPendingEventId(eventId);
+  }, [linkParams.eventId, linkParams.date]);
+
+  // Promote the pending deep-link event once it's actually in the loaded list.
+  // If it never loads — unpublished, past, or not visible to this user — the
+  // app just stays on the normal tonight view; the link silently does nothing.
+  useEffect(() => {
+    if (!pendingEventId) return;
+    const match = filteredEvents.find((e) => e.event_id === pendingEventId);
+    if (match) {
+      setSelectedEventId(pendingEventId);
+      setPendingEventId(null);
+    }
+  }, [pendingEventId, filteredEvents]);
 
   // Reset selection synchronously when filters change (batched in same render)
   const handleDanceStyleFilter = useCallback((style: string | null) => {

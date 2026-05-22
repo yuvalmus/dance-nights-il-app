@@ -26,11 +26,13 @@ export default function ActivityFriendsScreen() {
     activityId?: string;
     activityType?: string;
     title?: string;
+    date?: string;
   }>();
 
   const isEvent = params.activityType === 'event';
   const activityId = params.activityId ?? '';
   const title = params.title ?? '';
+  const date = params.date ?? '';
 
   const { friends, loading } = useActivitySocial(
     isEvent ? { eventId: activityId } : { courseId: activityId },
@@ -38,11 +40,11 @@ export default function ActivityFriendsScreen() {
 
   const handleShare = useCallback(() => {
     if (isEvent) {
-      shareEventLink({ title });
+      shareEventLink({ eventId: activityId, title, date });
     } else {
       shareCourseLink({ courseId: activityId, title });
     }
-  }, [isEvent, activityId, title]);
+  }, [isEvent, activityId, title, date]);
 
   useEffect(() => {
     navigation.setOptions({

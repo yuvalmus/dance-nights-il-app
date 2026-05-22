@@ -29,6 +29,7 @@ export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: 
             activityType="event"
             activityId={event.event_id}
             activityTitle={event.title}
+            activityDate={event.date}
             state={social.state}
             friends={social.friends}
             viewerGoing={social.viewerGoing}
