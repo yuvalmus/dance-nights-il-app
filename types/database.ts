@@ -521,9 +521,13 @@ export interface Database {
         Args: { other_user_id: string };
         Returns: { id: string; display_name: string | null }[];
       };
-      get_friends_at_activity: {
+      get_activity_social: {
         Args: { p_event_id?: string | null; p_course_id?: string | null };
-        Returns: { id: string; display_name: string | null }[];
+        Returns: {
+          total_going: number;
+          viewer_going: boolean;
+          friends: { id: string; display_name: string | null }[];
+        }[];
       };
       search_profiles_for_friends: {
         Args: { query_text?: string; max_results?: number };

@@ -1,10 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
-import { useGoingToggle } from '@/hooks/useGoingToggle';
-import { useFriendsAtActivity } from '@/hooks/useFriendsAtActivity';
-import GoingToggle from '@/components/social/GoingToggle';
-import FriendsGoingStrip from '@/components/social/FriendsGoingStrip';
+import { useActivitySocial } from '@/hooks/useActivitySocial';
+import SocialSection from '@/components/social/SocialSection';
 import { ScheduleSection } from './ScheduleSection';
 import { InstructorPills } from './InstructorPills';
 import { AddressBox } from './AddressBox';
@@ -18,11 +16,29 @@ type Props = {
 };
 
 export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: Props) {
-  const { isGoing, loading: goingLoading, toggling, toggle } = useGoingToggle({ eventId: event.event_id });
-  const { friends } = useFriendsAtActivity({ eventId: event.event_id });
+  const social = useActivitySocial({ eventId: event.event_id });
 
   return (
     <View style={styles.container}>
+      {/* Social block — "why should I care" — sits above the details so the
+          reason to act is the first thing read, not the last. Hidden for
+          signed-out viewers, who have no friend graph to act on. */}
+      {social.authenticated && (
+        <View style={styles.socialWrap}>
+          <SocialSection
+            activityType="event"
+            activityId={event.event_id}
+            activityTitle={event.title}
+            state={social.state}
+            friends={social.friends}
+            viewerGoing={social.viewerGoing}
+            toggling={social.toggling}
+            loading={social.loading}
+            onJoin={social.toggle}
+          />
+        </View>
+      )}
+
       {event.description && (
         <Text style={styles.description}>{event.description}</Text>
       )}
@@ -52,16 +68,6 @@ export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: 
         priceNote={event.price_note}
         accentColor={accentColor}
       />
-
-      {/* Social: going toggle + friends strip */}
-      <View style={styles.socialSection}>
-        <GoingToggle
-          isGoing={isGoing}
-          onToggle={toggle}
-          loading={goingLoading || toggling}
-        />
-        <FriendsGoingStrip friends={friends} />
-      </View>
     </View>
   );
 }
@@ -74,18 +80,14 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 14,
   },
+  socialWrap: {
+    marginBottom: 14,
+  },
   description: {
     color: Colors.textSecondary,
     fontSize: 13,
     textAlign: 'right',
     lineHeight: 21,
     marginBottom: 12,
-  },
-  socialSection: {
-    marginTop: 12,
-    gap: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-    paddingTop: 12,
   },
 });

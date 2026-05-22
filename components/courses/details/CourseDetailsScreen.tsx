@@ -8,10 +8,8 @@ import { openNavigation } from '@/lib/navigation';
 import { shareCourseLink } from '@/lib/courseShare';
 import { addCourseSchedulesToCalendar } from '@/lib/courseCalendar';
 import { deleteCourse, setCoursePublish } from '@/lib/courseService';
-import { useGoingToggle } from '@/hooks/useGoingToggle';
-import { useFriendsAtActivity } from '@/hooks/useFriendsAtActivity';
-import GoingToggle from '@/components/social/GoingToggle';
-import FriendsGoingStrip from '@/components/social/FriendsGoingStrip';
+import { useActivitySocial } from '@/hooks/useActivitySocial';
+import SocialSection from '@/components/social/SocialSection';
 import CourseHeroPoster from './CourseHeroPoster';
 import CourseMetaSection from './CourseMetaSection';
 import CourseStructureAccordion from './CourseStructureAccordion';
@@ -49,8 +47,7 @@ export default function CourseDetailsScreen({
   const isApproval = mode === 'approval';
   const { course, loading, error, mutate } = useCourseDetails(courseId);
   const [calendarLoading, setCalendarLoading] = useState(false);
-  const going = useGoingToggle(courseId ? { courseId } : { courseId: '' });
-  const { friends: friendsAtCourse } = useFriendsAtActivity(courseId ? { courseId } : { courseId: '' });
+  const social = useActivitySocial(courseId ? { courseId } : { courseId: '' });
 
   const isCreator = !!user && !!course && course.created_by === user.id;
   const isVenueOwner =
@@ -254,21 +251,39 @@ export default function CourseDetailsScreen({
         {/* 1. Hero poster with title */}
         <CourseHeroPoster posterUrl={course.poster_url} title={course.title} />
 
-        {/* 2. Description + light info blocks (date, time, level) */}
+        {/* 2. Social block — "why should I care", above the course details.
+            Hidden for signed-out viewers, who have no friend graph. */}
+        {social.authenticated && (
+          <View style={styles.socialWrap}>
+            <SocialSection
+              activityType="course"
+              activityId={course.id}
+              activityTitle={course.title}
+              state={social.state}
+              friends={social.friends}
+              viewerGoing={social.viewerGoing}
+              toggling={social.toggling}
+              loading={social.loading}
+              onJoin={social.toggle}
+            />
+          </View>
+        )}
+
+        {/* 3. Description + light info blocks (date, time, level) */}
         <CourseMetaSection course={course} creatorLabel={creatorLabel} />
 
-        {/* 3. Course structure accordion */}
+        {/* 4. Course structure accordion */}
         <CourseStructureAccordion
           schedules={course.course_schedules}
         />
 
-        {/* 4. What will we learn — checkpoints */}
+        {/* 5. What will we learn — checkpoints */}
         <CourseLearningSection outcomes={outcomes} />
 
-        {/* 5. Announcements — standout golden cards */}
+        {/* 6. Announcements — standout golden cards */}
         <CourseAnnouncementsSection announcements={announcements} />
 
-        {/* 6. Address */}
+        {/* 7. Address */}
         {venue && (
           <View style={styles.addressWrap}>
             <AddressBox
@@ -277,18 +292,6 @@ export default function CourseDetailsScreen({
               hasCoordinates={hasCoordinates}
               onNavigate={handleNavigate}
             />
-          </View>
-        )}
-
-        {/* 7. Social: going toggle + friends strip */}
-        {courseId && (
-          <View style={styles.socialSection}>
-            <GoingToggle
-              isGoing={going.isGoing}
-              onToggle={going.toggle}
-              loading={going.loading || going.toggling}
-            />
-            <FriendsGoingStrip friends={friendsAtCourse} />
           </View>
         )}
 
@@ -329,9 +332,8 @@ const styles = StyleSheet.create({
   addressWrap: {
     paddingHorizontal: 20,
   },
-  socialSection: {
+  socialWrap: {
     paddingHorizontal: 20,
-    gap: 10,
   },
   bottomSpacer: {
     height: 130,

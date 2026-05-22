@@ -50,7 +50,6 @@ export const TTL = {
   AFFILIATIONS: 5 * 60 * 1000,       // 5 min — rare transitions, checked on focus
   NOTIFICATIONS: 2 * 60 * 1000,      // 2 min — short-lived, "inbox" style
   COURSE_APPROVAL: 2 * 60 * 1000,    // 2 min — venue-owner inbox
-  GOING: 5 * 60 * 1000,              // 5 min — own registration status
-  FRIENDS_AT_ACTIVITY: 2 * 60 * 1000, // 2 min — social, changes often
+  ACTIVITY_SOCIAL: 2 * 60 * 1000,    // 2 min — going count + friends, changes often
   FRIENDS: 5 * 60 * 1000,            // 5 min — friend list
 } as const;
