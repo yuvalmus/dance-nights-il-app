@@ -12,11 +12,13 @@ import MyCoursesSection from '@/components/courses/MyCoursesSection';
 import PillSelect from '@/components/ui/PillSelect';
 import AffiliationsSection from '@/components/profile/AffiliationsSection';
 import NotificationsSection from '@/components/profile/NotificationsSection';
+import { useFriendCount } from '@/hooks/useFriendCount';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { profile, updateProfile } = useProfile();
   const { venue } = useVenue();
+  const { count: friendCount } = useFriendCount();
   const router = useRouter();
 
   if (!user) {
@@ -71,6 +73,17 @@ export default function ProfileScreen() {
                 <Text style={styles.artistBadgeText}>אמן מאומת</Text>
               </View>
             )}
+            <TouchableOpacity
+              style={styles.friendCountBtn}
+              onPress={() => router.push('/profile/friends')}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="people-outline" size={15} color={Colors.primary} />
+              <Text style={styles.friendCountText}>
+                {friendCount} {friendCount === 1 ? 'חבר/ה' : 'חברים'}
+              </Text>
+              <Ionicons name="chevron-back" size={14} color={Colors.textMuted} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -177,6 +190,21 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 12,
     fontWeight: '700',
+  },
+  friendCountBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: Colors.surfaceLight,
+  },
+  friendCountText: {
+    color: Colors.text,
+    fontSize: 14,
+    fontWeight: '600',
   },
   sectionTitle: {
     color: Colors.text,

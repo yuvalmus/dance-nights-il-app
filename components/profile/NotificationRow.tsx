@@ -16,6 +16,11 @@ const ICON_BY_TYPE: Record<NotificationType, keyof typeof ICONS> = {
   course_pending_approval: 'clipboard',
   course_approved: 'checkmark-circle',
   course_rejected: 'close-circle',
+  friend_request: 'person-add',
+  friend_accepted: 'checkmark-circle',
+  friend_going_event: 'people',
+  friend_going_course: 'people',
+  event_date_changed: 'calendar',
 };
 const ICONS = {
   'person-remove': 'person-remove-outline',
@@ -23,6 +28,9 @@ const ICONS = {
   clipboard: 'clipboard-outline',
   'checkmark-circle': 'checkmark-circle-outline',
   'close-circle': 'close-circle-outline',
+  'person-add': 'person-add-outline',
+  people: 'people-outline',
+  calendar: 'calendar-outline',
 } as const;
 
 function formatTime(iso: string): string {

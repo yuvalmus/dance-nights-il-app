@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { EventWithVenue } from '@/types/database';
+import { useActivitySocial } from '@/hooks/useActivitySocial';
+import SocialSection from '@/components/social/SocialSection';
 import { ScheduleSection } from './ScheduleSection';
 import { InstructorPills } from './InstructorPills';
 import { AddressBox } from './AddressBox';
@@ -14,8 +16,30 @@ type Props = {
 };
 
 export function CardDetails({ event, accentColor, hasCoordinates, onNavigate }: Props) {
+  const social = useActivitySocial({ eventId: event.event_id });
+
   return (
     <View style={styles.container}>
+      {/* Social block — "why should I care" — sits above the details so the
+          reason to act is the first thing read, not the last. Hidden for
+          signed-out viewers, who have no friend graph to act on. */}
+      {social.authenticated && (
+        <View style={styles.socialWrap}>
+          <SocialSection
+            activityType="event"
+            activityId={event.event_id}
+            activityTitle={event.title}
+            activityDate={event.date}
+            state={social.state}
+            friends={social.friends}
+            viewerGoing={social.viewerGoing}
+            toggling={social.toggling}
+            loading={social.loading}
+            onJoin={social.toggle}
+          />
+        </View>
+      )}
+
       {event.description && (
         <Text style={styles.description}>{event.description}</Text>
       )}
@@ -56,6 +80,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 14,
+  },
+  socialWrap: {
+    marginBottom: 14,
   },
   description: {
     color: Colors.textSecondary,
