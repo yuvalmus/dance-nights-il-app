@@ -3,6 +3,7 @@ import { Colors } from "@/constants/colors";
 import { DANCE_STYLES, DANCE_STYLE_LABELS } from "@/constants/config";
 import PillSelect from "@/components/ui/PillSelect";
 import { LiveToggle } from "./LiveToggle";
+import FavoritesToggle from "./FavoritesToggle";
 
 const ALL_VALUE = 'all';
 
@@ -17,6 +18,9 @@ type Props = {
   liveFilter: boolean;
   onLiveToggle: () => void;
   liveDisabled?: boolean;
+  favoritesFilter: boolean;
+  onFavoritesToggle: () => void;
+  favoritesDisabled?: boolean;
 };
 
 export function FilterPills({
@@ -25,6 +29,9 @@ export function FilterPills({
   liveFilter,
   onLiveToggle,
   liveDisabled,
+  favoritesFilter,
+  onFavoritesToggle,
+  favoritesDisabled,
 }: Props) {
   const handleToggle = (value: string) => {
     onDanceStyleSelect(value === ALL_VALUE || value === '' ? null : value);
@@ -46,6 +53,11 @@ export function FilterPills({
       </View>
 
       <View style={styles.divider} />
+      <FavoritesToggle
+        active={favoritesFilter}
+        disabled={favoritesDisabled}
+        onPress={onFavoritesToggle}
+      />
       <LiveToggle active={liveFilter} disabled={liveDisabled} onPress={onLiveToggle} />
     </View>
   );

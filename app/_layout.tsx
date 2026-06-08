@@ -4,7 +4,14 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider } from "@/lib/auth";
 import { Colors } from "@/constants/colors";
 import { useAppReady } from "@/hooks/useAppReady";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { NavigationSheet, navigationSheetRef } from "@/components/ui/NavigationSheet";
+
+// Inner component runs inside <AuthProvider> so it can read auth state.
+function PushBoot() {
+  usePushNotifications();
+  return null;
+}
 
 export default function RootLayout() {
   const ready = useAppReady();
@@ -14,6 +21,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
+        <PushBoot />
         <StatusBar style="light" />
         <Stack
           screenOptions={{
@@ -49,6 +57,12 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="profile"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="notifications"
             options={{
               headerShown: false,
             }}

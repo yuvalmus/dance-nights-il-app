@@ -123,6 +123,7 @@ export interface Database {
           favorite_venues: string[];
           expo_push_token: string | null;
           is_artist: boolean;
+          notification_preferences: NotificationPreferences;
           created_at: string;
           updated_at: string;
         };
@@ -133,6 +134,7 @@ export interface Database {
           dance_styles?: string[];
           favorite_venues?: string[];
           expo_push_token?: string | null;
+          notification_preferences?: NotificationPreferences;
           // is_artist is server-controlled — column UPDATE revoked from
           // authenticated/anon roles; kept out of Insert/Update to stop the
           // app from ever trying to write it.
@@ -445,8 +447,13 @@ export interface Database {
           title: string;
           body: string | null;
           data: Json;
+          group_key: string | null;
+          push_eligible: boolean;
+          last_push_at: string | null;
           read_at: string | null;
           created_at: string;
+          updated_at: string;
+          sort_at: string;
         };
         // Clients never INSERT — triggers own writes. Shape exists for
         // completeness only.
@@ -457,6 +464,32 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      user_favorites: {
+        Row: {
+          id: string;
+          user_id: string;
+          target_type: FavoriteTargetType;
+          target_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          target_type: FavoriteTargetType;
+          target_id: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: 'user_favorites_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -537,6 +570,22 @@ export interface Database {
           venue_logo_url: string | null;
         })[];
       };
+      get_notification_feed: {
+        Args: {
+          p_cursor_sort_at?: string | null;
+          p_cursor_id?: string | null;
+          p_limit?: number;
+        };
+        Returns: NotificationFeedRow[];
+      };
+      get_notification_unread_count: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      toggle_user_favorite: {
+        Args: { p_target_type: FavoriteTargetType; p_target_id: string };
+        Returns: boolean;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
@@ -558,9 +607,74 @@ export type NotificationType =
   | 'course_rejected'
   | 'friend_request'
   | 'friend_accepted'
+  // Legacy v1 per-friend rows — kept so old data still type-checks. New
+  // writes use the aggregated `friends_going` type below.
   | 'friend_going_event'
   | 'friend_going_course'
-  | 'event_date_changed';
+  | 'friends_going'
+  | 'event_date_changed'
+  | 'event_cancelled'
+  | 'event_reminder'
+  | 'course_starting_this_week'
+  | 'registration_spike'
+  | 'spots_low'
+  | 'favorite_venue_event'
+  | 'favorite_artist_course';
+
+export type FavoriteTargetType = 'venue' | 'artist';
+
+export type NotificationPreferenceKey =
+  | 'social'
+  | 'friend_requests'
+  | 'management'
+  | 'event_updates'
+  | 'favorites'
+  | 'reminders';
+
+export type NotificationPreferences = Record<NotificationPreferenceKey, boolean>;
+
+export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
+  social: true,
+  friend_requests: true,
+  management: true,
+  event_updates: true,
+  favorites: true,
+  reminders: true,
+};
+
+// Shape returned by the get_notification_feed RPC. The unread_count + has_more
+// pair on every row keeps the round-trip count down: the client reads one,
+// not three queries, per pagination step.
+export type NotificationFeedRow = {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string | null;
+  data: Json;
+  group_key: string | null;
+  read_at: string | null;
+  created_at: string;
+  updated_at: string;
+  sort_at: string;
+  unread_count: number;
+  has_more: boolean;
+};
+
+// Shape of the data payload on an aggregated friends-going row. Computed by
+// the DB trigger; the inbox row component reads `actors` to render avatars.
+export type FriendsGoingActor = {
+  id: string;
+  display_name: string | null;
+  at: string;
+};
+
+export type FriendsGoingData = {
+  activity_kind: 'event' | 'course';
+  activity_id: string;
+  activity_title: string;
+  deep_link: string;
+  actors: FriendsGoingActor[];
+};
 
 export type FriendProfile = {
   id: string;
@@ -582,6 +696,7 @@ export type VenueAffiliation = Database['public']['Tables']['venue_affiliations'
 export type Registration = Database['public']['Tables']['registrations']['Row'];
 export type Friendship = Database['public']['Tables']['friendships']['Row'];
 export type Notification = Database['public']['Tables']['notifications']['Row'];
+export type UserFavorite = Database['public']['Tables']['user_favorites']['Row'];
 
 // The shape returned by the get_events_by_date_and_distance RPC
 export type EventWithVenue = {
@@ -596,6 +711,7 @@ export type EventWithVenue = {
   dj: string | null;
   pre_register: boolean;
   registration_links: RegistrationLink[];
+  venue_id: string;
   venue_name: string;
   venue_slug: string;
   address: string;

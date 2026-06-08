@@ -13,6 +13,9 @@ import { DateToggle } from "@/components/map/DateToggle";
 import { EventBottomSheet, SheetRef } from "@/components/events/EventBottomSheet";
 import { FilterPills } from "@/components/events/FilterPills";
 import { PollButton } from "@/components/poll/PollButton";
+import NotificationFloatingButton from "@/components/notifications/NotificationFloatingButton";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
+import { useAuth } from "@/lib/auth";
 import { getTodayKey, isInBoundaryWindow, getLastNightKey } from "@/lib/date";
 
 const BOUNDARY = isInBoundaryWindow();
@@ -28,6 +31,7 @@ export default function TonightScreen() {
   });
   const [danceStyleFilter, setDanceStyleFilter] = useState<string | null>(null);
   const [liveFilter, setLiveFilter] = useState(BOUNDARY);
+  const [favoritesFilter, setFavoritesFilter] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   // Event id from a deep link, held until that event appears in the loaded
   // list — then promoted to selectedEventId (centres pin + expands card).
@@ -49,9 +53,15 @@ export default function TonightScreen() {
 
   const { events, loading } = useEvents(selectedDate);
   const userLocation = useUserLocation();
+  const { user } = useAuth();
+  const { venueIds: favoriteVenueIds } = useUserFavorites();
+  const favoritesDisabled = !user || favoriteVenueIds.size === 0;
   const filteredEvents = useMemo(
-    () => filterEvents(events, danceStyleFilter, liveFilter),
-    [events, danceStyleFilter, liveFilter],
+    () =>
+      filterEvents(events, danceStyleFilter, liveFilter, favoritesFilter, {
+        favoriteVenueIds,
+      }),
+    [events, danceStyleFilter, liveFilter, favoritesFilter, favoriteVenueIds],
   );
 
   const isTodaySelected = selectedDate === INITIAL_DATE;
@@ -115,6 +125,11 @@ export default function TonightScreen() {
     setSelectedEventId(null);
   }, []);
 
+  const toggleFavoritesFilter = useCallback(() => {
+    setFavoritesFilter((v) => !v);
+    setSelectedEventId(null);
+  }, []);
+
   const handlePinPress = useCallback((eventId: string) => {
     setSelectedEventId(eventId);
   }, []);
@@ -149,6 +164,9 @@ export default function TonightScreen() {
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate}
       />
+
+      <NotificationFloatingButton />
+
         <TouchableOpacity
           style={[styles.fitButton, { top: insets.top + 62 }]}
           onPress={handleFitAll}
@@ -172,6 +190,9 @@ export default function TonightScreen() {
             liveFilter={liveFilter}
             onLiveToggle={toggleLiveFilter}
             liveDisabled={!isTodaySelected}
+            favoritesFilter={favoritesFilter}
+            onFavoritesToggle={toggleFavoritesFilter}
+            favoritesDisabled={favoritesDisabled}
           />
         }
       />

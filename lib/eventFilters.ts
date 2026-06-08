@@ -1,10 +1,16 @@
 import { EventWithVenue } from '@/types/database';
 import { isEventLive } from '@/lib/date';
 
+type FilterOptions = {
+  favoriteVenueIds?: Set<string>;
+};
+
 export function filterEvents(
   events: EventWithVenue[],
   danceStyle: string | null,
   liveOnly: boolean,
+  favoritesOnly: boolean = false,
+  options: FilterOptions = {},
 ): EventWithVenue[] {
   let filtered = danceStyle
     ? events.filter((e) => e.dance_styles.includes(danceStyle))
@@ -12,6 +18,10 @@ export function filterEvents(
 
   if (liveOnly) {
     filtered = filtered.filter((e) => isEventLive(e.date, e.schedules?.[0]?.time));
+  }
+
+  if (favoritesOnly && options.favoriteVenueIds) {
+    filtered = filtered.filter((e) => options.favoriteVenueIds!.has(e.venue_id));
   }
 
   return filtered.sort((a, b) => {

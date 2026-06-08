@@ -11,7 +11,7 @@ import MyVenueCard from '@/components/venue/MyVenueCard';
 import MyCoursesSection from '@/components/courses/MyCoursesSection';
 import PillSelect from '@/components/ui/PillSelect';
 import AffiliationsSection from '@/components/profile/AffiliationsSection';
-import NotificationsSection from '@/components/profile/NotificationsSection';
+import NotificationPreferencesSection from '@/components/profile/NotificationPreferencesSection';
 import { useFriendCount } from '@/hooks/useFriendCount';
 
 export default function ProfileScreen() {
@@ -87,9 +87,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Notifications */}
-        <NotificationsSection />
-
         {/* Venue owners get a slim entry card → /profile/manage hub.
             Events / courses / instructors all live inside the manage
             screen so the profile stays focused on identity. */}
@@ -126,6 +123,9 @@ export default function ProfileScreen() {
             onToggle={toggleDanceStyle}
           />
         </View>
+
+        {/* Notification preferences (per-category mute toggles) */}
+        <NotificationPreferencesSection />
 
         {/* Sign out */}
         <TouchableOpacity style={styles.signOutButton} onPress={signOut}>

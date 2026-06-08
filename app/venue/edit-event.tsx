@@ -89,6 +89,25 @@ export default function EditEventScreen() {
   const handleSubmit = async (values: EventFormValues) => {
     if (!eventId) return;
 
+    // Owner is unpublishing a future event that was previously live: every
+    // registrant will get a notification about the cancellation. Give the
+    // owner one chance to back out before the trigger fires.
+    const wasPublished = initialValues?.is_published === true;
+    const futureDate = values.date && values.date >= new Date().toISOString().slice(0, 10);
+    if (wasPublished && !values.is_published && futureDate) {
+      const confirmed = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          'ביטול פרסום',
+          'ביטול פרסום ישלח התראה לכל מי שסימן הגעה לאירוע. להמשיך?',
+          [
+            { text: 'ביטול',   style: 'cancel',      onPress: () => resolve(false) },
+            { text: 'המשך',    style: 'destructive', onPress: () => resolve(true)  },
+          ],
+        );
+      });
+      if (!confirmed) return;
+    }
+
     setLoading(true);
     try {
       await updateEvent({ values, eventId, originalPosterUrl });
